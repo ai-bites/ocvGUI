@@ -27,7 +27,7 @@ public:
     cv::Mat opImage;
 
     /** All functions to enable different action **/
-    void doMorphOper(QString name);
+    void doMorphOper(QString name,int, int);
 };
 
 #endif // IMGPROCESS_H

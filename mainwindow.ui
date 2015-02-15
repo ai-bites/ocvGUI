@@ -189,8 +189,8 @@
         <rect>
          <x>20</x>
          <y>30</y>
-         <width>111</width>
-         <height>51</height>
+         <width>161</width>
+         <height>71</height>
         </rect>
        </property>
        <property name="title">
@@ -201,8 +201,8 @@
          <rect>
           <x>0</x>
           <y>20</y>
-          <width>104</width>
-          <height>26</height>
+          <width>91</width>
+          <height>21</height>
          </rect>
         </property>
         <item>
@@ -230,6 +230,70 @@
           <string>Erode</string>
          </property>
         </item>
+       </widget>
+       <widget class="QLabel" name="label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>50</y>
+          <width>59</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Element</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="morphElemLineEdit_1">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>50</y>
+          <width>21</width>
+          <height>21</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="morphElemLineEdit_2">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>50</y>
+          <width>21</width>
+          <height>21</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_2">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>50</y>
+          <width>16</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="morphOkButton">
+        <property name="geometry">
+         <rect>
+          <x>130</x>
+          <y>50</y>
+          <width>31</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>OK</string>
+        </property>
        </widget>
       </widget>
       <widget class="QGroupBox" name="groupBox_3">

@@ -7,16 +7,17 @@ ImgProcess::ImgProcess()
 {
 }
 
-void ImgProcess::doMorphOper(QString name)
+void ImgProcess::doMorphOper(QString name, int l=5, int b=5)
 {
     if (name.toStdString() == "Open")
     {
-        cv::Mat elem(5,5,CV_8U,cv::Scalar(1));
+        cout << "in do morph open" << "l is: " << l << endl;
+        cv::Mat elem(l,b,CV_8U,cv::Scalar(1));
         cv::morphologyEx(this->image,this->opImage,cv::MORPH_OPEN,elem);
     }
     else if (name.toStdString() == "Close")
     {
-        cv::Mat elem(5,5,CV_8U,cv::Scalar(1));
+        cv::Mat elem(l,b,CV_8U,cv::Scalar(1));
         cv::morphologyEx(this->image,this->opImage,cv::MORPH_CLOSE,elem);
     }
     else if (name.toStdString() == "Dilate")

@@ -38,10 +38,13 @@ private slots:
 
     void on_MorphComboBox_activated(const QString &value);
 
+    void on_morphOkButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     ImgProcess * ip;
     void displayOp();
+    bool isImgLoaded;
 
 };
 

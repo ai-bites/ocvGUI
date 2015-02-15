@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->ip = new ImgProcess();
+    this->isImgLoaded = false;
 }
 
 MainWindow::~MainWindow()
@@ -69,10 +70,11 @@ void MainWindow::on_action_Open_triggered()
         return;
     }
 
+    // colour to grayscale
     cv::cvtColor(ip->image, ip->grayImage, CV_BGR2GRAY);
+
     QImage img = QImage((const unsigned char*)(ip->image.data),
                        ip->image.cols,ip->image.rows,QImage::Format_RGB888);
-
     cout << "image size is: " << ip->image.cols << " " << ip->image.rows << endl;
 
     //display on label
@@ -82,6 +84,9 @@ void MainWindow::on_action_Open_triggered()
     //resize everything to suit the image
     ui->InputLabel->resize(ui->inFrame->width(), ui->inFrame->height());
     ui->OutputLabel->resize(ui->inFrame->width(), ui->inFrame->height());
+
+    this->isImgLoaded = true;
+    return;
 }
 
 void MainWindow::on_action_Close_triggered()
@@ -102,9 +107,10 @@ void MainWindow::on_action_Save_triggered()
 
 void MainWindow::on_MorphComboBox_activated(const QString &value)
 {
-    cout << "morph box activated" << value.toStdString() << endl;
-    if (value.toStdString() == "select") { return; }
-    ip->doMorphOper(value);
+    if (isImgLoaded == 0) {return;}
+    if (value.toStdString() == "select") { return;}
+
+    ip->doMorphOper(value,5,5);
     displayOp();
 }
 
@@ -116,5 +122,18 @@ void MainWindow::displayOp()
     ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
     ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
     ui->OutputLabel->setScaledContents(true);
+
+}
+
+void MainWindow::on_morphOkButton_clicked()
+{
+    if (isImgLoaded == 0) return;
+    QString value = ui->MorphComboBox->currentText();
+    if (value.toStdString() != "Close" && value.toStdString() != "Open") return;
+
+    int l = ui->morphElemLineEdit_1->text().toInt();
+    int h = ui->morphElemLineEdit_2->text().toInt();
+    ip->doMorphOper(value,l,h);
+    displayOp();
 
 }
