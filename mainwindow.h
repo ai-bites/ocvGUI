@@ -15,6 +15,9 @@
 #include <iostream>
 #include "imgprocess.h"
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -27,7 +30,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    Ui::MainWindow * getUI();
 
 private slots:
     void on_action_Open_triggered();
@@ -39,6 +41,10 @@ private slots:
     void on_MorphComboBox_activated(const QString &value);
 
     void on_morphOkButton_clicked();
+
+    void on_logoCheckBox_clicked();
+
+    void on_logoSpinBox_editingFinished();
 
 private:
     Ui::MainWindow *ui;
