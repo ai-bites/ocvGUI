@@ -19,6 +19,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "morphologydialog.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -30,27 +32,25 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    bool isImgLoaded;
+    ImgProcess * ip;
 
 private slots:
+    // all actions triggered from tools menu
     void on_action_Open_triggered();
-
     void on_action_Close_triggered();
-
     void on_action_Save_triggered();
-
-    void on_MorphComboBox_activated(const QString &value);
-
-    void on_morphOkButton_clicked();
+    void on_actionMorphology_triggered();
 
     void on_logoCheckBox_clicked();
-
     void on_logoSpinBox_editingFinished();
+
+    // All handlers for signals emitted from dialog boxes
+    void handleMorphSignal(QString choice, int h, int w);
 
 private:
     Ui::MainWindow *ui;
-    ImgProcess * ip;
     void displayOp();
-    bool isImgLoaded;
 
 };
 

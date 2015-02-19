@@ -19,6 +19,12 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QTabWidget" name="tabWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="maximumSize">
          <size>
           <width>1000</width>
@@ -53,7 +59,7 @@
                <x>0</x>
                <y>0</y>
                <width>371</width>
-               <height>381</height>
+               <height>300</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -72,9 +78,6 @@
               <set>Qt::AlignCenter</set>
              </property>
             </widget>
-            <zorder>InputLabel</zorder>
-            <zorder>groupBox</zorder>
-            <zorder>groupBox</zorder>
            </widget>
           </item>
           <item row="0" column="1">
@@ -97,7 +100,7 @@
                <x>0</x>
                <y>0</y>
                <width>371</width>
-               <height>381</height>
+               <height>300</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -124,50 +127,99 @@
          <attribute name="title">
           <string>Video</string>
          </attribute>
-         <widget class="QFrame" name="vIpFrame">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>400</width>
-            <height>400</height>
-           </rect>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <property name="leftMargin">
+           <number>12</number>
           </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+          <property name="rightMargin">
+           <number>12</number>
           </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+          <property name="bottomMargin">
+           <number>12</number>
           </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-         </widget>
-         <widget class="QFrame" name="vOpFrame">
-          <property name="geometry">
-           <rect>
-            <x>410</x>
-            <y>0</y>
-            <width>400</width>
-            <height>400</height>
-           </rect>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-         </widget>
+          <item row="0" column="0">
+           <widget class="QFrame" name="vIpFrame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <widget class="QLabel" name="vIpLabel">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>371</width>
+               <height>300</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Input Video</string>
+             </property>
+             <property name="scaledContents">
+              <bool>false</bool>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QFrame" name="vOpFrame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <widget class="QLabel" name="vOpLabel">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>371</width>
+               <height>300</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Output Video</string>
+             </property>
+             <property name="scaledContents">
+              <bool>false</bool>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>
@@ -176,10 +228,16 @@
     <item row="1" column="0">
      <widget class="QGroupBox" name="groupBox">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>1000</width>
+        <height>100</height>
+       </size>
       </property>
       <property name="title">
        <string>Operations</string>
@@ -187,130 +245,6 @@
       <property name="alignment">
        <set>Qt::AlignCenter</set>
       </property>
-      <widget class="QGroupBox" name="groupBox_2">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>30</y>
-         <width>161</width>
-         <height>71</height>
-        </rect>
-       </property>
-       <property name="title">
-        <string>Morphology</string>
-       </property>
-       <widget class="QComboBox" name="MorphComboBox">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>20</y>
-          <width>91</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <item>
-         <property name="text">
-          <string>select</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Open</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Close</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Dilate</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Erode</string>
-         </property>
-        </item>
-       </widget>
-       <widget class="QWidget" name="layoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>40</y>
-          <width>416</width>
-          <height>33</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="spacing">
-          <number>-1</number>
-         </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetFixedSize</enum>
-         </property>
-         <item>
-          <widget class="QLabel" name="label">
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Element</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="morphElemLineEdit_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="morphElemLineEdit_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="morphOkButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>OK</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
       <widget class="QGroupBox" name="groupBox_3">
        <property name="geometry">
         <rect>
@@ -405,6 +339,32 @@
         </property>
        </widget>
       </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>640</x>
+         <y>70</y>
+         <width>153</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>Close</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -429,7 +389,46 @@
     <addaction name="action_Save"/>
     <addaction name="action_Close"/>
    </widget>
+   <widget class="QMenu" name="menuOperations">
+    <property name="title">
+     <string>Operations</string>
+    </property>
+    <widget class="QMenu" name="menuHough">
+     <property name="title">
+      <string>Hough</string>
+     </property>
+     <addaction name="actionLines"/>
+     <addaction name="actionCircles"/>
+    </widget>
+    <addaction name="action_Filter"/>
+    <addaction name="actionAdd_Noise"/>
+    <addaction name="actionMorphology"/>
+    <addaction name="actionColour_Space"/>
+    <addaction name="actionBlur"/>
+    <addaction name="menuHough"/>
+    <addaction name="actionContrast"/>
+    <addaction name="actionBrighten"/>
+    <addaction name="actionThreshold"/>
+   </widget>
+   <widget class="QMenu" name="menuEdge">
+    <property name="title">
+     <string>Edge</string>
+    </property>
+    <addaction name="actionCanny"/>
+   </widget>
+   <widget class="QMenu" name="menuExtract">
+    <property name="title">
+     <string>Extract</string>
+    </property>
+    <addaction name="actionCorners"/>
+    <addaction name="actionFAST"/>
+    <addaction name="actionSURF"/>
+    <addaction name="actionSIFT"/>
+   </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuOperations"/>
+   <addaction name="menuEdge"/>
+   <addaction name="menuExtract"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -462,6 +461,17 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QToolBar" name="toolBar_3">
+   <property name="windowTitle">
+    <string>toolBar_3</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
   <action name="action_Open">
    <property name="text">
     <string>&amp;Open</string>
@@ -475,6 +485,81 @@
   <action name="action_Close">
    <property name="text">
     <string>&amp;Close</string>
+   </property>
+  </action>
+  <action name="action_Filter">
+   <property name="text">
+    <string>Filter</string>
+   </property>
+  </action>
+  <action name="actionAdd_Noise">
+   <property name="text">
+    <string>Add Noise</string>
+   </property>
+  </action>
+  <action name="actionMorphology">
+   <property name="text">
+    <string>Morphology</string>
+   </property>
+  </action>
+  <action name="actionColour_Space">
+   <property name="text">
+    <string>Colour Space</string>
+   </property>
+  </action>
+  <action name="actionBlur">
+   <property name="text">
+    <string>Blur</string>
+   </property>
+  </action>
+  <action name="actionLines">
+   <property name="text">
+    <string>Lines</string>
+   </property>
+  </action>
+  <action name="actionCircles">
+   <property name="text">
+    <string>Circles</string>
+   </property>
+  </action>
+  <action name="actionContrast">
+   <property name="text">
+    <string>Contrast</string>
+   </property>
+  </action>
+  <action name="actionBrighten">
+   <property name="text">
+    <string>Brighten</string>
+   </property>
+  </action>
+  <action name="actionThreshold">
+   <property name="text">
+    <string>Threshold</string>
+   </property>
+  </action>
+  <action name="actionCanny">
+   <property name="text">
+    <string>Canny</string>
+   </property>
+  </action>
+  <action name="actionCorners">
+   <property name="text">
+    <string>Corners</string>
+   </property>
+  </action>
+  <action name="actionFAST">
+   <property name="text">
+    <string>FAST</string>
+   </property>
+  </action>
+  <action name="actionSURF">
+   <property name="text">
+    <string>SURF</string>
+   </property>
+  </action>
+  <action name="actionSIFT">
+   <property name="text">
+    <string>SIFT</string>
    </property>
   </action>
  </widget>

@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->ip = new ImgProcess();
     this->isImgLoaded = false;
+
 }
 
 MainWindow::~MainWindow()
@@ -19,6 +20,70 @@ MainWindow::~MainWindow()
 }
 
 
+void MainWindow::displayOp()
+{
+    cv::Mat temp;
+    cvtColor(ip->opImage,temp, CV_GRAY2RGB);
+    QImage img = QImage((const unsigned char*)(temp.data),
+                       temp.cols,temp.rows,QImage::Format_RGB888);
+    ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
+    ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
+    ui->OutputLabel->setScaledContents(true);
+}
+
+
+void MainWindow::on_logoCheckBox_clicked()
+{
+    if (this->isImgLoaded == false) return;
+
+    if (ui->logoCheckBox->isChecked() == true)
+    {
+        cout << "it is checked" << endl;
+        double alpha = ui->logoSpinBox->value();
+        ip->addLogo(alpha, 10, 10);
+    }
+    else
+        cout << "it is unchecked" << endl;
+    displayOp();
+}
+
+void MainWindow::on_logoSpinBox_editingFinished()
+{
+    cout << "in spinbox edit" << endl;
+    ip->addLogo(ui->logoSpinBox->value(), 10,10);
+    displayOp();
+}
+
+
+void MainWindow::handleMorphSignal(QString choice, int h, int w)
+{
+    if (isImgLoaded == 0) return;
+
+    ip->doMorphOper(choice,w,h);
+    displayOp();
+}
+
+
+//!
+//! All the triggers for actions from Operations menu
+//!
+
+void MainWindow::on_actionMorphology_triggered()
+{
+    if (this->isImgLoaded == false) return;
+
+    MorphologyDialog * d = new MorphologyDialog(this);
+    connect(d,  SIGNAL(sendMorphSignal(QString, int, int)),
+            this, SLOT(handleMorphSignal(QString, int, int)));
+    d->show();
+}
+
+//! End ************************************************!//
+
+
+//!
+//! All the triggers for actions from File menu
+//!
 void MainWindow::on_action_Open_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
@@ -48,7 +113,14 @@ void MainWindow::on_action_Open_triggered()
     ui->OutputLabel->resize(ui->inFrame->width(), ui->inFrame->height());
 
     this->isImgLoaded = true;
+
     return;
+}
+
+
+void MainWindow::on_action_Save_triggered()
+{
+
 }
 
 void MainWindow::on_action_Close_triggered()
@@ -56,70 +128,4 @@ void MainWindow::on_action_Close_triggered()
     // action to close the window
 }
 
-
-/**
- * @brief MainWindow::on_action_Save_triggered: Saves the output file.
- */
-void MainWindow::on_action_Save_triggered()
-{
-
-}
-
-
-
-void MainWindow::on_MorphComboBox_activated(const QString &value)
-{
-    if (isImgLoaded == 0) {return;}
-    if (value.toStdString() == "select") { return;}
-
-    ip->doMorphOper(value,5,5);
-    displayOp();
-}
-
-
-void MainWindow::displayOp()
-{
-    cv::Mat temp;
-    cvtColor(ip->opImage,temp, CV_GRAY2RGB);
-    QImage img = QImage((const unsigned char*)(temp.data),
-                       temp.cols,temp.rows,QImage::Format_RGB888);
-    ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
-    ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
-    ui->OutputLabel->setScaledContents(true);
-}
-
-void MainWindow::on_morphOkButton_clicked()
-{
-    if (isImgLoaded == 0) return;
-    QString value = ui->MorphComboBox->currentText();
-    if (value.toStdString() != "Close" && value.toStdString() != "Open") return;
-
-    int l = ui->morphElemLineEdit_1->text().toInt();
-    int h = ui->morphElemLineEdit_2->text().toInt();
-    ip->doMorphOper(value,l,h);
-    displayOp();
-
-}
-
-
-void MainWindow::on_logoCheckBox_clicked()
-{
-    if (this->isImgLoaded == false) return;
-
-    if (ui->logoCheckBox->isChecked() == true)
-    {
-        cout << "it is checked" << endl;
-        double alpha = ui->logoSpinBox->value();
-        ip->addLogo(alpha, 10, 10);
-    }
-    else
-        cout << "it is unchecked" << endl;
-    displayOp();
-}
-
-void MainWindow::on_logoSpinBox_editingFinished()
-{
-    cout << "in spinbox edit" << endl;
-    ip->addLogo(ui->logoSpinBox->value(), 10,10);
-    displayOp();
-}
+//! End ************************************************!//
