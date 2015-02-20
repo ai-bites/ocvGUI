@@ -37,19 +37,18 @@ void ImgProcess::doMorphOper(QString name, int l=5, int b=5)
 }
 
 
-void ImgProcess::addNoise(QString type)
+void ImgProcess::addNoise(QString type, int val)
 {
-    this->opImage = this->image;
+    this->opImage = this->grayImage;
 
     if (type.toStdString() == "SALT_AND_PEPPER")
     {
-        //TODO: set n dynamically
-        for (int k = 0; k < 100; k++)
+        for (int k = 0; k <= val; k++)
         {
-            int a = (QString::number(qrand() % ((200 + 1) - 10) + 10)).toInt();
-            int b = (QString::number(qrand() % ((200 + 1) - 10) + 10)).toInt();
-            int c = 10;
-            int d = 100;
+            int a = (QString::number(qrand() % ((grayImage.rows + 1)) + 10)).toInt();
+            int b = (QString::number(qrand() % ((grayImage.cols + 1)) + 10)).toInt();
+            int c = (QString::number(qrand() % ((grayImage.rows + 1)) + 10)).toInt();
+            int d = (QString::number(qrand() % ((grayImage.cols + 1)) + 10)).toInt();
 
             if(this->opImage.channels() == 1)
             {
@@ -57,17 +56,6 @@ void ImgProcess::addNoise(QString type)
                 this->opImage.at<uchar>(a,b) = 255;
                 // pepper
                 this->opImage.at<uchar>(c,d) = 0;
-            }
-            else
-            {
-                // salt
-                opImage.at<cv::Vec3b>(a,b)[0]= 255;
-                opImage.at<cv::Vec3b>(a,b)[1]= 255;
-                opImage.at<cv::Vec3b>(a,b)[2]= 255;
-                // pepper
-                opImage.at<cv::Vec3b>(c,d)[0]= 0;
-                opImage.at<cv::Vec3b>(c,d)[1]= 0;
-                opImage.at<cv::Vec3b>(c,d)[2]= 0;
             }
         }
     }

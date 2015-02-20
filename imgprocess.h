@@ -36,7 +36,7 @@ public:
     // Do morphological operations
     void doMorphOper(QString name,int, int);
     // Add a given type of noise
-    void addNoise(QString name);
+    void addNoise(QString name, int val);
     // add a logo to image
     void addLogo(float alpha,int h, int l);
 

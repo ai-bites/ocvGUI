@@ -22,11 +22,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::displayOp()
 {
+    cout << "in disp op" << endl;
     cv::Mat temp;
+
     cvtColor(ip->opImage,temp, CV_GRAY2RGB);
-    QImage img = QImage((const unsigned char*)(temp.data),
-                       temp.cols,temp.rows,QImage::Format_RGB888);
-    ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
+    QImage img = QImage((const unsigned char*)(temp.data),temp.cols,temp.rows,QImage::Format_RGB888);
+
     ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
     ui->OutputLabel->setScaledContents(true);
 }
@@ -49,6 +50,7 @@ void MainWindow::on_logoCheckBox_clicked()
 
 void MainWindow::on_logoSpinBox_editingFinished()
 {
+    if (this->isImgLoaded == false) return;
     cout << "in spinbox edit" << endl;
     ip->addLogo(ui->logoSpinBox->value(), 10,10);
     displayOp();
@@ -64,27 +66,15 @@ void MainWindow::handleMorphSignal(QString choice, int h, int w)
 }
 
 
-//!
-//! All the triggers for actions from Operations menu
-//!
-
-void MainWindow::on_actionMorphology_triggered()
+void MainWindow::handleSnPNoiseSignal(QString name, int n)
 {
-    if (this->isImgLoaded == false) return;
-
-    MorphologyDialog * d = new MorphologyDialog(this);
-    connect(d,  SIGNAL(sendMorphSignal(QString, int, int)),
-            this, SLOT(handleMorphSignal(QString, int, int)));
-    d->show();
+    ui->OutputLabel->clear();
+    ip->addNoise(name, n);
+    displayOp();
 }
 
-//! End ************************************************!//
 
-
-//!
-//! All the triggers for actions from File menu
-//!
-void MainWindow::on_action_Open_triggered()
+void MainWindow::handleImageOpen()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
     ip->image = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
@@ -113,6 +103,76 @@ void MainWindow::on_action_Open_triggered()
     ui->OutputLabel->resize(ui->inFrame->width(), ui->inFrame->height());
 
     this->isImgLoaded = true;
+}
+
+
+//!
+//! All the triggers for actions from Operations menu
+//!
+void MainWindow::on_actionMorphology_triggered()
+{
+    if (this->isImgLoaded == false) return;
+
+    MorphologyDialog * d = new MorphologyDialog(this);
+    connect(d,  SIGNAL(sendMorphSignal(QString, int, int)),
+            this, SLOT(handleMorphSignal(QString, int, int)));
+    d->show();
+}
+
+
+void MainWindow::on_actionAdd_Noise_triggered()
+{
+    if (this->isImgLoaded == false) return;
+
+    NoiseDialog * nd = new NoiseDialog(this);
+    connect(nd, SIGNAL(sendSnPNoise(QString,int)), this, SLOT(handleSnPNoiseSignal(QString, int)));
+    nd->show();
+}
+
+//! End ************************************************!//
+
+
+//!
+//! All the triggers for actions from File menu
+//!
+void MainWindow::on_action_Open_triggered()
+{
+    // dealing with image
+    if (ui->tabWidget->currentIndex() == 0)
+    {
+        this->handleImageOpen();
+    }
+    else // video
+    {
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
+
+        cv::VideoCapture capture(fileName.toStdString());
+        // check before proceeding
+        if (!capture.isOpened()) return;
+
+        double rate = capture.get(CV_CAP_PROP_FPS);
+        bool stop(false);
+
+        cv::Mat frame; // current video frame
+        int delay= 10000/rate;
+        while (!stop)
+        {
+            cout << "interating... " << endl;
+            // read next frame if any
+            if (!capture.read(frame)) break;
+
+            QImage img = QImage((const unsigned char*)(frame.data),
+                               frame.cols,frame.rows,QImage::Format_RGB888);
+
+            ui->vIpLabel->setPixmap(QPixmap::fromImage(img));
+            ui->vIpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
+            if (cv::waitKey(delay) >= 0) stop = true;
+        }
+            // Close the video file.
+            // Not required since called by destructor
+            capture.release();
+    }
+
 
     return;
 }
@@ -129,3 +189,4 @@ void MainWindow::on_action_Close_triggered()
 }
 
 //! End ************************************************!//
+

@@ -20,6 +20,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "morphologydialog.h"
+#include "noisedialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -47,6 +48,10 @@ private slots:
 
     // All handlers for signals emitted from dialog boxes
     void handleMorphSignal(QString choice, int h, int w);
+    void handleSnPNoiseSignal(QString name, int n);
+    void handleImageOpen();
+
+    void on_actionAdd_Noise_triggered();
 
 private:
     Ui::MainWindow *ui;

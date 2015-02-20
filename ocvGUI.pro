@@ -15,11 +15,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     imgprocess.cpp \
-    morphologydialog.cpp
+    morphologydialog.cpp \
+    noisedialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
-    morphologydialog.h
+    morphologydialog.h \
+    noisedialog.h
 
 INCLUDEPATH += /usr/local/include
 
@@ -31,4 +33,5 @@ LIBS += -L/usr/local/lib \
    -lopencv_calib3d
 
 FORMS    += mainwindow.ui \
-    morphologydialog.ui
+    morphologydialog.ui \
+    noisedialog.ui
