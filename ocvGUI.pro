@@ -17,16 +17,16 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     imgprocess.cpp \
-    morphologydialog.cpp \
-    noisedialog.cpp \
+    Dialogs/morphologydialog.cpp \
+    Dialogs/noisedialog.cpp \
     videoprocess.cpp \
     Dialogs/blurdialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
-    morphologydialog.h \
-    noisedialog.h \
     videoprocess.h \
+    Dialogs/morphologydialog.h \
+    Dialogs/noisedialog.h \
     Dialogs/blurdialog.h
 
 INCLUDEPATH += /usr/local/include

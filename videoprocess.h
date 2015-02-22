@@ -12,10 +12,6 @@ class VideoProcess
 public:
     VideoProcess();
 
-protected:
-
-signals:
-
 private:
 
 

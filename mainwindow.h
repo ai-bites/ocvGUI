@@ -28,8 +28,8 @@
 
 #include "imgprocess.h"
 #include "videoprocess.h"
-#include "morphologydialog.h"
-#include "noisedialog.h"
+#include "Dialogs/morphologydialog.h"
+#include "Dialogs/noisedialog.h"
 
 namespace Ui {
 class MainWindow;
