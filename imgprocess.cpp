@@ -34,6 +34,7 @@ void ImgProcess::doMorphOper(QString name, int l=5, int b=5)
         cout << "not a standard morphological operation!" << endl;
         return;
     }
+
 }
 
 

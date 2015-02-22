@@ -15,12 +15,8 @@
 #include <QThread>
 #include <QImage>
 #include <QWaitCondition>
-#include <qmediaplayer.h>
-#include <qmediaplaylist.h>
 #include <iostream>
-#include <QtMultimedia/qmediaplayer.h>
 #include <QtWidgets/QtWidgets>
-#include <QVideoWidget>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -43,8 +39,12 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     bool isImgLoaded;
+    bool isVideoLoaded;
     ImgProcess * ip;
     VideoProcess * vp;
+
+signals:
+    void sendVideoIpImage(QImage);
 
 private slots:
     // all actions triggered from tools menu
@@ -58,18 +58,20 @@ private slots:
     void handleMorphSignal(QString choice, int h, int w);
     void handleSnPNoiseSignal(QString name, int n);
     void handleImageOpen();
-    void handleVideoOpen();
+    void handleVideoOpen(VideoCapture capture);
 
     void on_pushButton_clicked();
 
-    void updateVideoImage(QImage);
+    void on_StartLiveCheckBox_clicked(bool checked);
+
+    void updateVideoOpImage(QImage);
+    void updateVideoIpImage(QImage);
+
 
 private:
     Ui::MainWindow *ui;
     void displayOp();
-
-signals:
-    void sendVideoImage(QImage);
+    bool liveStreamStop;
 
 };
 

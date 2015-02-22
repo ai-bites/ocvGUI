@@ -20,7 +20,6 @@ void MorphologyDialog::on_morphOkButton_accepted()
     this->currentOption = this->ui->MorphComboBox->currentText();
     int h = this->ui->MorphHeightspinBox->value();
     int w = this->ui->MorphWidthSpinBox->value();
-    std::cout << "h is:" << h << std::endl;
     emit sendMorphSignal(currentOption, h, w);
 }
 

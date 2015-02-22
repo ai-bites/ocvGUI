@@ -2,6 +2,7 @@
 #define MORPHOLOGYDIALOG_H
 
 #include <QDialog>
+#include <QObject>
 #include "mainwindow.h"
 
 #include <qsignaltransition.h>

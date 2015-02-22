@@ -10,10 +10,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->ip = new ImgProcess();
+    this->vp = new VideoProcess();
+    vp->ip = this->ip;
     this->isImgLoaded = false;
-
+    this->isVideoLoaded = false;
+    this->liveStreamStop = false;
     // establish all the connections with other classes
-    connect(this, SIGNAL(sendVideoImage(QImage)), this, SLOT(updateVideoImage(QImage)));
+    connect(this, SIGNAL(sendVideoIpImage(QImage)), this, SLOT(updateVideoIpImage(QImage)));
+    connect(vp,   SIGNAL(sendVidoeOpImg(QImage)),   this, SLOT(updateVideoOpImage(QImage)));
+
 }
 
 MainWindow::~MainWindow()
@@ -62,10 +67,18 @@ void MainWindow::on_logoSpinBox_editingFinished()
 
 void MainWindow::handleMorphSignal(QString choice, int h, int w)
 {
-    if (isImgLoaded == 0) return;
+    if (isImgLoaded)
+    {
+        ip->doMorphOper(choice,w,h);
+        displayOp();
 
-    ip->doMorphOper(choice,w,h);
-    displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        cout << "going to do video morph" << endl;
+        vp->doMorphOperation(choice,w,h);
+    }
+
 }
 
 
@@ -109,19 +122,51 @@ void MainWindow::handleImageOpen()
 }
 
 
-void MainWindow::handleVideoOpen()
+void MainWindow::handleVideoOpen(VideoCapture capture)
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
-    //vp->loadVideo(fileName);
-    //connect main function to receive processed video
+    QImage img;
+    vp->capture = capture;
+    // Get the frame rate
+    double rate = capture.get(CV_CAP_PROP_FPS);
+
+    cv::Mat frame;
+    cv::Mat destFrame;
+    // Delay between each frame in ms
+    int delay = 100;
+
+    // for all frames in video
+    while (!liveStreamStop)
+    {
+        // read next frame if any
+        if (!capture.read(frame)) break;
+        cvtColor(frame,destFrame,CV_BGR2RGB);
+        img = QImage((const unsigned char*)(destFrame.data),
+              destFrame.cols,destFrame.rows,QImage::Format_RGB888);
+
+        // introduce a delay
+
+        emit sendVideoIpImage(img);
+        cout << "processing Input video" << endl;
+        qApp->processEvents();
+    }
+    // Close the video file.
+    capture.release();
 }
 
 
-void MainWindow::updateVideoImage(QImage img)
+void MainWindow::updateVideoIpImage(QImage img)
 {
     ui->vIpLabel->setPixmap(QPixmap::fromImage(img));
     ui->vIpLabel->setScaledContents(true);
     ui->vIpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
+}
+
+
+void MainWindow::updateVideoOpImage(QImage img)
+{
+    ui->vOpLabel->setPixmap(QPixmap::fromImage(img));
+    ui->vOpLabel->setScaledContents(true);
+    ui->vOpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
 }
 
 
@@ -130,18 +175,18 @@ void MainWindow::updateVideoImage(QImage img)
 //!
 void MainWindow::on_actionMorphology_triggered()
 {
-    if (this->isImgLoaded == false) return;
-
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
     MorphologyDialog * d = new MorphologyDialog(this);
     connect(d,  SIGNAL(sendMorphSignal(QString, int, int)),
             this, SLOT(handleMorphSignal(QString, int, int)));
+
     d->show();
 }
 
 
 void MainWindow::on_actionAdd_Noise_triggered()
 {
-    if (this->isImgLoaded == false) return;
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
 
     NoiseDialog * nd = new NoiseDialog(this);
     connect(nd, SIGNAL(sendSnPNoise(QString,int)), this, SLOT(handleSnPNoiseSignal(QString, int)));
@@ -157,67 +202,16 @@ void MainWindow::on_actionAdd_Noise_triggered()
 void MainWindow::on_action_Open_triggered()
 {
     // dealing with image
-    if (ui->tabWidget->currentIndex() == 0)
+    if (ui->tabWidget->currentIndex() == 0) // image
     {
         this->handleImageOpen();
     }
-    /*
-    if (ui->tabWidget->currentIndex() == 1)
+    if (ui->tabWidget->currentIndex() == 1) // video
     {
-       QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
-        QMediaPlayer * player = new QMediaPlayer;
-
-        QMediaPlaylist * playlist = new QMediaPlaylist(player);
-
-
-        playlist->addMedia(QUrl::fromLocalFile(fileName));
-
-        QVideoWidget * videoWidget = new QVideoWidget;
-        player->setVideoOutput(videoWidget);
-
-        videoWidget->show();
-        playlist->setCurrentIndex(1);
-        player->play();
+            QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
+            cv::VideoCapture capture(fileName.toStdString());
+            this->handleVideoOpen(capture);
     }
-    */
-    else
-    {
-        QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
-        cv::VideoCapture capture(fileName.toStdString());
-        QImage img;
-
-        if (!capture.isOpened()) return;
-              // Get the frame rate
-              double rate = capture.get(CV_CAP_PROP_FPS);
-              cout << "rate is" << rate << endl;
-
-              bool stop(false);
-              cv::Mat frame; // current video frame
-              cv::Mat destFrame;
-              // Delay between each frame in ms
-              // corresponds to video frame rate
-              int delay= 1000 /rate;
-              cout << "delay is: " << delay << endl;
-              // for all frames in video
-              while (!stop)
-              {
-                 // read next frame if any
-                 if (!capture.read(frame)) break;
-                 cvtColor(frame,destFrame,CV_BGR2RGB);
-                 img = QImage((const unsigned char*)(destFrame.data),
-                              destFrame.cols,destFrame.rows,QImage::Format_RGB888);
-                 // introduce a delay
-                 if (cv::waitKey(delay) >= 0) stop= true;
-
-                 //emit sendVideoImage(img);
-                 updateVideoImage(img);
-                 qApp->processEvents();
-               }
-              // Close the video file.
-              // Not required since called by destructor
-              capture.release();
-    }
-
     return;
 }
 
@@ -245,3 +239,23 @@ void MainWindow::on_pushButton_clicked()
 
 
 //! End ************************************************!//
+
+void MainWindow::on_StartLiveCheckBox_clicked(bool checked)
+{
+    if (checked) // start
+    {
+        cv::VideoCapture capture(0);
+        if (capture.isOpened())
+        {
+            this->isVideoLoaded = true;
+            this->handleVideoOpen(capture);
+        }
+    }
+    else
+    {
+        liveStreamStop = true;
+        vp->liveStreamStop = true;
+        ui->vIpLabel->clear();
+        ui->vOpLabel->clear();
+    }
+}
