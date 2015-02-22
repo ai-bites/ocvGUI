@@ -12,6 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ip = new ImgProcess();
     this->isImgLoaded = false;
 
+    // establish all the connections with other classes
+    connect(this, SIGNAL(sendVideoImage(QImage)), this, SLOT(updateVideoImage(QImage)));
 }
 
 MainWindow::~MainWindow()
@@ -22,7 +24,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::displayOp()
 {
-    cout << "in disp op" << endl;
     cv::Mat temp;
 
     cvtColor(ip->opImage,temp, CV_GRAY2RGB);
@@ -33,6 +34,7 @@ void MainWindow::displayOp()
 }
 
 
+/*
 void MainWindow::on_logoCheckBox_clicked()
 {
     if (this->isImgLoaded == false) return;
@@ -55,6 +57,7 @@ void MainWindow::on_logoSpinBox_editingFinished()
     ip->addLogo(ui->logoSpinBox->value(), 10,10);
     displayOp();
 }
+*/
 
 
 void MainWindow::handleMorphSignal(QString choice, int h, int w)
@@ -106,6 +109,22 @@ void MainWindow::handleImageOpen()
 }
 
 
+void MainWindow::handleVideoOpen()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
+    //vp->loadVideo(fileName);
+    //connect main function to receive processed video
+}
+
+
+void MainWindow::updateVideoImage(QImage img)
+{
+    ui->vIpLabel->setPixmap(QPixmap::fromImage(img));
+    ui->vIpLabel->setScaledContents(true);
+    ui->vIpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
+}
+
+
 //!
 //! All the triggers for actions from Operations menu
 //!
@@ -142,37 +161,62 @@ void MainWindow::on_action_Open_triggered()
     {
         this->handleImageOpen();
     }
-    else // video
+    /*
+    if (ui->tabWidget->currentIndex() == 1)
+    {
+       QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
+        QMediaPlayer * player = new QMediaPlayer;
+
+        QMediaPlaylist * playlist = new QMediaPlaylist(player);
+
+
+        playlist->addMedia(QUrl::fromLocalFile(fileName));
+
+        QVideoWidget * videoWidget = new QVideoWidget;
+        player->setVideoOutput(videoWidget);
+
+        videoWidget->show();
+        playlist->setCurrentIndex(1);
+        player->play();
+    }
+    */
+    else
     {
         QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
-
         cv::VideoCapture capture(fileName.toStdString());
-        // check before proceeding
+        QImage img;
+
         if (!capture.isOpened()) return;
+              // Get the frame rate
+              double rate = capture.get(CV_CAP_PROP_FPS);
+              cout << "rate is" << rate << endl;
 
-        double rate = capture.get(CV_CAP_PROP_FPS);
-        bool stop(false);
+              bool stop(false);
+              cv::Mat frame; // current video frame
+              cv::Mat destFrame;
+              // Delay between each frame in ms
+              // corresponds to video frame rate
+              int delay= 1000 /rate;
+              cout << "delay is: " << delay << endl;
+              // for all frames in video
+              while (!stop)
+              {
+                 // read next frame if any
+                 if (!capture.read(frame)) break;
+                 cvtColor(frame,destFrame,CV_BGR2RGB);
+                 img = QImage((const unsigned char*)(destFrame.data),
+                              destFrame.cols,destFrame.rows,QImage::Format_RGB888);
+                 // introduce a delay
+                 if (cv::waitKey(delay) >= 0) stop= true;
 
-        cv::Mat frame; // current video frame
-        int delay= 10000/rate;
-        while (!stop)
-        {
-            cout << "interating... " << endl;
-            // read next frame if any
-            if (!capture.read(frame)) break;
-
-            QImage img = QImage((const unsigned char*)(frame.data),
-                               frame.cols,frame.rows,QImage::Format_RGB888);
-
-            ui->vIpLabel->setPixmap(QPixmap::fromImage(img));
-            ui->vIpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
-            if (cv::waitKey(delay) >= 0) stop = true;
-        }
-            // Close the video file.
-            // Not required since called by destructor
-            capture.release();
+                 //emit sendVideoImage(img);
+                 updateVideoImage(img);
+                 qApp->processEvents();
+               }
+              // Close the video file.
+              // Not required since called by destructor
+              capture.release();
     }
-
 
     return;
 }
@@ -186,7 +230,18 @@ void MainWindow::on_action_Save_triggered()
 void MainWindow::on_action_Close_triggered()
 {
     // action to close the window
+    this->close();
 }
 
 //! End ************************************************!//
 
+//!
+//! All actions from the Main window (save, close and logo)
+//!
+void MainWindow::on_pushButton_clicked()
+{
+    this->close();
+}
+
+
+//! End ************************************************!//

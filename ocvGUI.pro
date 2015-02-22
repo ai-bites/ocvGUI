@@ -5,6 +5,8 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT       += multimedia
+QT       += multimediawidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,12 +18,16 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     imgprocess.cpp \
     morphologydialog.cpp \
-    noisedialog.cpp
+    noisedialog.cpp \
+    videoprocess.cpp \
+    Dialogs/blurdialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
     morphologydialog.h \
-    noisedialog.h
+    noisedialog.h \
+    videoprocess.h \
+    Dialogs/blurdialog.h
 
 INCLUDEPATH += /usr/local/include
 

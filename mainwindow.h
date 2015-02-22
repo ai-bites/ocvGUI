@@ -11,14 +11,23 @@
 #include <QTextEdit>
 #include <QString>
 #include <QLabel>
-
+#include <QMutex>
+#include <QThread>
+#include <QImage>
+#include <QWaitCondition>
+#include <qmediaplayer.h>
+#include <qmediaplaylist.h>
 #include <iostream>
-#include "imgprocess.h"
+#include <QtMultimedia/qmediaplayer.h>
+#include <QtWidgets/QtWidgets>
+#include <QVideoWidget>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "imgprocess.h"
+#include "videoprocess.h"
 #include "morphologydialog.h"
 #include "noisedialog.h"
 
@@ -35,6 +44,7 @@ public:
     ~MainWindow();
     bool isImgLoaded;
     ImgProcess * ip;
+    VideoProcess * vp;
 
 private slots:
     // all actions triggered from tools menu
@@ -42,20 +52,24 @@ private slots:
     void on_action_Close_triggered();
     void on_action_Save_triggered();
     void on_actionMorphology_triggered();
-
-    void on_logoCheckBox_clicked();
-    void on_logoSpinBox_editingFinished();
+    void on_actionAdd_Noise_triggered();
 
     // All handlers for signals emitted from dialog boxes
     void handleMorphSignal(QString choice, int h, int w);
     void handleSnPNoiseSignal(QString name, int n);
     void handleImageOpen();
+    void handleVideoOpen();
 
-    void on_actionAdd_Noise_triggered();
+    void on_pushButton_clicked();
+
+    void updateVideoImage(QImage);
 
 private:
     Ui::MainWindow *ui;
     void displayOp();
+
+signals:
+    void sendVideoImage(QImage);
 
 };
 
