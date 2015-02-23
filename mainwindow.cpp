@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <unistd.h>
 
 using namespace cv;
 using namespace std;
@@ -14,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     vp->ip = this->ip;
     this->isImgLoaded = false;
     this->isVideoLoaded = false;
-    this->liveStreamStop = false;
+    this->videoStop = false;
     // establish all the connections with other classes
     connect(this, SIGNAL(sendVideoIpImage(QImage)), this, SLOT(updateVideoIpImage(QImage)));
     connect(vp,   SIGNAL(sendVidoeOpImg(QImage)),   this, SLOT(updateVideoOpImage(QImage)));
@@ -125,37 +126,48 @@ void MainWindow::handleImageOpen()
 void MainWindow::handleVideoOpen(VideoCapture capture)
 {
     QImage img;
-    vp->capture = capture;
     // Get the frame rate
     double rate = capture.get(CV_CAP_PROP_FPS);
-
     cv::Mat frame;
     cv::Mat destFrame;
     // Delay between each frame in ms
     int delay = 100;
 
-    // for all frames in video
-    while (!liveStreamStop)
+    // lets start the output window as a new thread before starting
+    // the input window
+    QThread * opVideoThread = new QThread;
+    this->vp->capture = &capture;
+    connect(this, SIGNAL(sendCapture()), this->vp, SLOT(displayOpVideo()));
+    this->vp->moveToThread(opVideoThread);
+
+    // op started as new thread, now send input capture
+    emit sendCapture();
+    opVideoThread->start();
+
+    // now display the input capture in input window
+    while (!videoStop)
     {
         // read next frame if any
-        if (!capture.read(frame)) break;
+        capture >> frame;
         cvtColor(frame,destFrame,CV_BGR2RGB);
         img = QImage((const unsigned char*)(destFrame.data),
               destFrame.cols,destFrame.rows,QImage::Format_RGB888);
 
-        // introduce a delay
-
         emit sendVideoIpImage(img);
         cout << "processing Input video" << endl;
+        //sleep(1);
         qApp->processEvents();
     }
+
     // Close the video file.
     capture.release();
+
 }
 
 
 void MainWindow::updateVideoIpImage(QImage img)
 {
+    qApp->processEvents();
     ui->vIpLabel->setPixmap(QPixmap::fromImage(img));
     ui->vIpLabel->setScaledContents(true);
     ui->vIpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
@@ -164,6 +176,7 @@ void MainWindow::updateVideoIpImage(QImage img)
 
 void MainWindow::updateVideoOpImage(QImage img)
 {
+    cout << "in update video op" << endl;
     ui->vOpLabel->setPixmap(QPixmap::fromImage(img));
     ui->vOpLabel->setScaledContents(true);
     ui->vOpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
@@ -232,13 +245,6 @@ void MainWindow::on_action_Close_triggered()
 //!
 //! All actions from the Main window (save, close and logo)
 //!
-void MainWindow::on_pushButton_clicked()
-{
-    this->close();
-}
-
-
-//! End ************************************************!//
 
 void MainWindow::on_StartLiveCheckBox_clicked(bool checked)
 {
@@ -253,9 +259,16 @@ void MainWindow::on_StartLiveCheckBox_clicked(bool checked)
     }
     else
     {
-        liveStreamStop = true;
+        videoStop = true;
         vp->liveStreamStop = true;
         ui->vIpLabel->clear();
         ui->vOpLabel->clear();
     }
 }
+
+void MainWindow::on_pushButton_clicked()
+{
+    this->close();
+}
+
+//! End ************************************************!//

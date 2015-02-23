@@ -12,11 +12,12 @@
 #include <QString>
 #include <QLabel>
 #include <QMutex>
-#include <QThread>
 #include <QImage>
 #include <QWaitCondition>
 #include <iostream>
 #include <QtWidgets/QtWidgets>
+#include <QtCore>
+#include <QThread>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -45,6 +46,7 @@ public:
 
 signals:
     void sendVideoIpImage(QImage);
+    void sendCapture();
 
 private slots:
     // all actions triggered from tools menu
@@ -67,11 +69,10 @@ private slots:
     void updateVideoOpImage(QImage);
     void updateVideoIpImage(QImage);
 
-
 private:
     Ui::MainWindow *ui;
     void displayOp();
-    bool liveStreamStop;
+    bool videoStop;
 
 };
 

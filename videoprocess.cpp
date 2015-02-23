@@ -1,6 +1,5 @@
 #include "videoprocess.h"
 
-#include <iostream>
 
 VideoProcess::VideoProcess()
 {
@@ -10,33 +9,37 @@ VideoProcess::VideoProcess()
 void VideoProcess::doMorphOperation(QString name, int l=5, int h=5)
 {
     QImage img;
+}
 
-    // Get the frame rate
 
+void VideoProcess::displayOpVideo()
+{
+    QImage img;
     cv::Mat frame;
     cv::Mat destFrame;
+
     // Delay between each frame in ms
     int delay = 100;
 
     // for all frames in video
     while (!liveStreamStop)
     {
-        // read next frame if any
-        if (!capture.read(frame)) break;
-        //cout << "going to convert to gray" << endl;
+        cout << "in op window display" << endl;
+        *capture >> frame;
         cvtColor(frame,destFrame,CV_BGR2GRAY);
-        //cout << "after.. " << endl;
-        ip->grayImage = destFrame;
-        ip->doMorphOper(name, l, h);
+        //ip->grayImage = destFrame;
+        //ip->doMorphOper(name, l, h);
         //cout << "after morph oerp" << endl;
-        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
-                     ip->opImage.rows,QImage::Format_Indexed8);
+        img = QImage((const unsigned char*)(destFrame.data),destFrame.cols,
+                     destFrame.rows,QImage::Format_Indexed8);
 
         emit sendVidoeOpImg(img);
         cout << "processing Output video" << endl;
+
         qApp->processEvents();
+        //sleep(1);
     }
     // Close the video file.
-    capture.release();
+    capture->release();
 }
 

@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QObject>
 #include <QApplication>
+#include <QThread>
+#include <QtCore>
 
 #include <qsignaltransition.h>
 #include <qsignalmapper.h>
@@ -13,6 +15,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <iostream>
+#include <unistd.h>
 
 #include "imgprocess.h"
 
@@ -25,13 +28,16 @@ class VideoProcess : public QObject
 
 public:
     VideoProcess();
-    VideoCapture capture;
+    VideoCapture * capture;
     bool liveStreamStop;
     void doMorphOperation(QString name, int, int);
     ImgProcess * ip;
 
 signals:
     void sendVidoeOpImg(QImage);
+
+public slots:
+    void displayOpVideo();
 };
 
 #endif // VIDEOPROCESS_H
