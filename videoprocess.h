@@ -28,16 +28,25 @@ class VideoProcess : public QObject
 
 public:
     VideoProcess();
-    VideoCapture * capture;
-    bool liveStreamStop;
-    void doMorphOperation(QString name, int, int);
+    VideoCapture capture;
     ImgProcess * ip;
+
+    cv::Mat frame;
+    cv::Mat destFrame;
+    bool isVideoStopped;
 
 signals:
     void sendVidoeOpImg(QImage);
 
 public slots:
     void displayOpVideo();
+
+    /** All operations possible on the video
+        are slots that can be invoked as separate
+        threads
+    **/
+    void doMorphOper(QString name, int, int);
+
 };
 
 #endif // VIDEOPROCESS_H

@@ -43,10 +43,12 @@ public:
     bool isVideoLoaded;
     ImgProcess * ip;
     VideoProcess * vp;
+    VideoCapture cap;
 
 signals:
     void sendVideoIpImage(QImage);
     void sendCapture();
+    void sendMorpOper(QString, int, int);
 
 private slots:
     // all actions triggered from tools menu
@@ -68,11 +70,14 @@ private slots:
 
     void updateVideoOpImage(QImage);
     void updateVideoIpImage(QImage);
+    void startVideoOp();
 
 private:
     Ui::MainWindow *ui;
     void displayOp();
-    bool videoStop;
+    bool isVideoStopped;
+
+    QThread * currentThread;
 
 };
 
