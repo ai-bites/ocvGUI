@@ -84,5 +84,103 @@ void ImgProcess::addLogo(float alpha, int h, int l)
 }
 
 
+void ImgProcess::toColourSpace(int idx)
+{
+    if (idx == 1)
+    {
+        cvtColor(image, opImage, CV_RGB2GRAY);
+    }
+    if (idx == 2)
+    {
+        cvtColor(image, opImage, CV_RGB2Lab);
+    }
+    if (idx == 3)
+    {
+        cvtColor(image, opImage, CV_RGB2HSV);
+    }
+    if (idx == 4)
+    {
+        cvtColor(image, opImage, CV_RGB2XYZ);
+    }
+    if (idx == 5)
+    {
+        cvtColor(image, opImage, CV_RGB2Luv);
+    }
+    if (idx == 6)
+    {
+        cvtColor(image, opImage, CV_RGB2HLS);
+    }
+}
 
+
+void ImgProcess::doBlur(int idx, int kernelL, int kernelH,
+                        double sigmaX, double sigmaY, int medianKernel)
+{
+    // normalized blur
+    if (idx == 1)
+    {
+        blur(this->grayImage, this->opImage, Size(kernelL,kernelH));
+    }
+    // gaussian blur
+    if (idx == 2)
+    {
+        GaussianBlur(this->grayImage, this->opImage, Size(kernelL, kernelH),sigmaX, sigmaY);
+    }
+    // median blur
+    if (idx == 4)
+    {
+        medianBlur(this->grayImage, this->opImage, medianKernel);
+    }
+}
+
+void ImgProcess::doSobelAndLapOper(int currentIdx, bool applyBlur,
+                       int kernel, int dx, int dy, double dxWeight,
+                       int delta,int scale)
+{
+    Mat xGrad, yGrad, absXGrad, absYGrad, temp, grayTemp;
+
+    if (applyBlur == true)
+    {
+        GaussianBlur( this->image, temp, Size(3,3), 0, 0, BORDER_DEFAULT);
+        cvtColor(temp, grayTemp, CV_RGB2GRAY);
+    }
+    else
+    {
+        temp = this->image.clone();
+        grayTemp = this->image.clone();
+    }
+
+    if (currentIdx == 1) // sobel
+    {
+        Sobel(grayTemp, xGrad, CV_16S, dx, 0, kernel, scale, delta,BORDER_DEFAULT );
+        Sobel(grayTemp, yGrad, CV_16S, 0, dy, kernel, scale, delta, BORDER_DEFAULT );
+        convertScaleAbs(xGrad, absXGrad);
+        convertScaleAbs(yGrad, absYGrad);
+        // finally add gradients to compute the final image
+        addWeighted(absXGrad, dxWeight, absYGrad, 1-dxWeight, 0, this->opImage);
+    }
+    else // laplacian
+    {
+        Laplacian(grayTemp, this->opImage, CV_16S, kernel, scale, delta, BORDER_DEFAULT);
+        convertScaleAbs(this->opImage, this->opImage);
+    }
+
+}
+
+
+void ImgProcess::doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad)
+{
+    Mat temp, grayTemp, mask;
+    grayTemp = this->grayImage.clone();
+    if (applyBlur == true)
+    {
+        GaussianBlur(this->image, temp, Size(3,3), 0,0, BORDER_DEFAULT);
+        cvtColor(temp, grayTemp, CV_RGB2GRAY);
+    }
+    // make a mask from canny operation
+    Canny(grayTemp, mask, threshold, 3*threshold, kernel, isL2Grad);
+    this->opImage = Scalar::all(0);
+    // use mask to copy over input to result
+    grayTemp.copyTo(this->opImage, mask);
+}
 

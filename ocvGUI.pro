@@ -19,14 +19,20 @@ SOURCES += main.cpp\
     Dialogs/morphologydialog.cpp \
     Dialogs/noisedialog.cpp \
     videoprocess.cpp \
-    Dialogs/blurdialog.cpp
+    Dialogs/blurdialog.cpp \
+    Dialogs/colourdialog.cpp \
+    Dialogs/sobeldialog.cpp \
+    Dialogs/cannydialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
     videoprocess.h \
     Dialogs/morphologydialog.h \
     Dialogs/noisedialog.h \
-    Dialogs/blurdialog.h
+    Dialogs/blurdialog.h \
+    Dialogs/colourdialog.h \
+    Dialogs/sobeldialog.h \
+    Dialogs/cannydialog.h
 
 INCLUDEPATH += /usr/local/include
 
@@ -39,4 +45,8 @@ LIBS += -L/usr/local/lib \
 
 FORMS    += mainwindow.ui \
     morphologydialog.ui \
-    noisedialog.ui
+    noisedialog.ui \
+    Dialogs/colourdialog.ui \
+    Dialogs/blurdialog.ui \
+    Dialogs/sobeldialog.ui \
+    Dialogs/cannydialog.ui

@@ -181,7 +181,7 @@
          </size>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="ImageTab">
          <attribute name="title">
@@ -422,6 +422,8 @@
      <string>Edge</string>
     </property>
     <addaction name="actionCanny"/>
+    <addaction name="separator"/>
+    <addaction name="actionSobel"/>
    </widget>
    <widget class="QMenu" name="menuExtract">
     <property name="title">
@@ -567,6 +569,16 @@
   <action name="actionSIFT">
    <property name="text">
     <string>SIFT</string>
+   </property>
+  </action>
+  <action name="actionSobel">
+   <property name="text">
+    <string>Sobel and Laplacian</string>
+   </property>
+  </action>
+  <action name="actionLaplacian">
+   <property name="text">
+    <string>Laplacian</string>
    </property>
   </action>
  </widget>

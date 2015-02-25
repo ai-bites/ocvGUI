@@ -30,10 +30,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::displayOp()
 {
+    // to keep Qt display happy
+    // we convert everything to color
     cv::Mat temp;
+    if (ip->opImage.channels() == 1)
+        cvtColor(ip->opImage,temp, CV_GRAY2RGB);
+    else
+        temp = ip->opImage.clone();
 
-    cvtColor(ip->opImage,temp, CV_GRAY2RGB);
-    QImage img = QImage((const unsigned char*)(temp.data),temp.cols,temp.rows,QImage::Format_RGB888);
+    QImage img = QImage((const unsigned char*)(temp.data),
+                            temp.cols,temp.rows,QImage::Format_RGB888);
 
     ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
     ui->OutputLabel->setScaledContents(true);
@@ -91,10 +97,44 @@ void MainWindow::handleSnPNoiseSignal(QString name, int n)
 }
 
 
+void MainWindow::handleColorDialogSignal(int idx)
+{
+    ui->OutputLabel->clear();
+    ip->toColourSpace(idx);
+    displayOp();
+}
+
+
+void MainWindow::handleBlurDialogSignal(int idx,int kernelL,
+                                        int kernelH, double sigmaX, double sigmaY,int medianKernel)
+{
+    ui->OutputLabel->clear();
+    ip->doBlur(idx, kernelL, kernelH, sigmaX, sigmaY, medianKernel);
+    displayOp();
+}
+
+
+void MainWindow::handleSobelDialogSignal(int currentIdx, bool applyBlur,
+                                         int kernel, int dx, int dy, double dxWeight,
+                                         int delta,int scale)
+{
+    ui->OutputLabel->clear();
+    ip->doSobelAndLapOper(currentIdx, applyBlur, kernel, dx, dy, dxWeight, delta, scale);
+    displayOp();
+}
+
+void MainWindow::handleCannySignal(int kernel, int threshold, bool applyBlur, bool isL2Grad)
+{
+    ui->OutputLabel->clear();
+    ip->doCannyOper(kernel, threshold, applyBlur, isL2Grad);
+    displayOp();
+}
+
 void MainWindow::handleImageOpen()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
-    ip->image = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
+    //QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
+    //ip->image = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
+    ip->image = imread("/Users/shreya/Desktop/1_nature.jpg");
 
     if(! ip->image.data )
     {
@@ -103,6 +143,7 @@ void MainWindow::handleImageOpen()
     }
     //TODO: change to right place or make UI for it.
     ip->logo = imread("/Users/shreya/Desktop/smile.png",CV_RGB2GRAY);
+
     // colour to grayscale
     cv::cvtColor(ip->image, ip->grayImage, CV_BGR2GRAY);
 
@@ -224,6 +265,60 @@ void MainWindow::on_actionAdd_Noise_triggered()
     connect(nd, SIGNAL(sendSnPNoise(QString,int)), this, SLOT(handleSnPNoiseSignal(QString, int)));
     nd->show();
 }
+
+
+void MainWindow::on_actionColour_Space_triggered()
+{
+    // check
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    // create new colour space dialog
+    ColourDialog * cd = new ColourDialog(this);
+    connect(cd, SIGNAL(sendColorVals(int)), this, SLOT(handleColorDialogSignal(int)));
+    cd->show();
+}
+
+void MainWindow::on_actionBlur_triggered()
+{
+    // check
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    // create a new blurring dialog
+    BlurDialog * bd = new BlurDialog;
+    connect(bd, SIGNAL(sendBlurVals(int,int,int,double,double,int)),
+            this, SLOT(handleBlurDialogSignal(int,int,int,double,double,int)));
+
+    bd->show();
+}
+
+
+void MainWindow::on_actionSobel_triggered()
+{
+    // check
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    // create a new window for parameters
+    SobelDialog * sd = new SobelDialog;
+    connect(sd, SIGNAL(sendSobelVals(int,bool,int,int,int,double,int,int)),
+            this, SLOT(handleSobelDialogSignal(int,bool,int,int,int,double,int,int)));
+
+    sd->show();
+}
+
+
+void MainWindow::on_actionCanny_triggered()
+{
+    // check
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    // create dialog for canny operation params
+    CannyDialog * cd = new CannyDialog;
+    connect(cd, SIGNAL(sendCannyVals(int,int,bool,bool)),
+            this, SLOT(handleCannySignal(int,int,bool,bool)));
+
+    cd->show();
+}
+
 
 //! End ************************************************!//
 

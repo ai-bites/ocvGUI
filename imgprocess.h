@@ -32,14 +32,21 @@ public:
     cv::Mat opImage;
     cv::Mat logo;
 
-    /** All functions to enable different action **/
+    /** All functions to enable different actions on images **/
     // Do morphological operations
     void doMorphOper(QString name,int, int);
     // Add a given type of noise
     void addNoise(QString name, int val);
-    // add a logo to image
+    // Add a logo to image
     void addLogo(float alpha,int h, int l);
-
+    // Convert to a new colourspace
+    void toColourSpace(int);
+    // Do blurring of input image
+    void doBlur(int idx, int, int, double, double, int);
+    // Do sobel and laplacian operations
+    void doSobelAndLapOper(int, bool, int, int, int, double, int, int);
+    // Do canny edge detection
+    void doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad);
 };
 
 #endif // IMGPROCESS_H

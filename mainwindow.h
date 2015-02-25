@@ -27,6 +27,10 @@
 #include "videoprocess.h"
 #include "Dialogs/morphologydialog.h"
 #include "Dialogs/noisedialog.h"
+#include "Dialogs/colourdialog.h"
+#include "Dialogs/blurdialog.h"
+#include "Dialogs/sobeldialog.h"
+#include "Dialogs/cannydialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -61,8 +65,16 @@ private slots:
     // All handlers for signals emitted from dialog boxes
     void handleMorphSignal(QString choice, int h, int w);
     void handleSnPNoiseSignal(QString name, int n);
+    void handleColorDialogSignal(int idx);
+    void handleBlurDialogSignal(int idx, int, int, double, double, int);
+    void handleSobelDialogSignal(int currentIdx, bool applyBlur,
+                                 int kernel, int dx, int dy, double dxWeight,
+                                 int delta,int scale);
+    void handleCannySignal(int kernel, int threshold, bool applyBlur, bool isL2Grad);
+
     void handleImageOpen();
     void handleVideoOpen(VideoCapture capture);
+
 
     void on_pushButton_clicked();
 
@@ -71,6 +83,14 @@ private slots:
     void updateVideoOpImage(QImage);
     void updateVideoIpImage(QImage);
     void startVideoOp();
+
+    void on_actionColour_Space_triggered();
+
+    void on_actionBlur_triggered();
+
+    void on_actionSobel_triggered();
+
+    void on_actionCanny_triggered();
 
 private:
     Ui::MainWindow *ui;
