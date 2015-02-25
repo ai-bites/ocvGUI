@@ -184,3 +184,72 @@ void ImgProcess::doCannyOper(int kernel, int threshold, bool applyBlur, bool isL
     grayTemp.copyTo(this->opImage, mask);
 }
 
+
+void ImgProcess::doHoughLineTransform(
+        int lineMethodIdx, int lineThreshold, int lineRhoRes, int lineThetaRes, bool lineEdgeDetect)
+{
+    Mat temp;
+
+    if (lineEdgeDetect == true)
+        Canny(this->grayImage, temp, 50, 150, 3);
+    else
+        temp = this->grayImage.clone();
+
+    cvtColor(temp, this->opImage, CV_GRAY2BGR);
+
+    if (lineMethodIdx == 1) // standard method
+    {
+        vector<Vec2f> lines;
+        HoughLines(temp, lines, lineRhoRes,double(lineThetaRes*(CV_PI/180)), lineThreshold);
+        for( int i = 0; i < lines.size(); i++ )
+        {
+            float rho = lines[i][0], theta = lines[i][1];
+            Point pt1, pt2;
+            double a = cos(theta), b = sin(theta);
+            double x0 = a*rho, y0 = b*rho;
+            pt1.x = cvRound(x0 + 1000*(-b));
+            pt1.y = cvRound(y0 + 1000*(a));
+            pt2.x = cvRound(x0 - 1000*(-b));
+            pt2.y = cvRound(y0 - 1000*(a));
+            line( this->opImage, pt1, pt2, Scalar(0,0,255), 2, CV_AA);
+        }
+    }
+    else // prob method
+    {
+        vector<Vec4i> lines;
+        HoughLinesP(temp, lines, lineRhoRes, double(lineThetaRes*(CV_PI/180)), lineThreshold);
+        for( int i = 0; i < lines.size(); i++ )
+        {
+            Vec4i l = lines[i];
+            line( this->opImage, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 2, CV_AA);
+        }
+    }
+}
+
+
+void ImgProcess::doHoughCircleTransform(
+        double cannyThresh, double detectThresh, int minRad, int maxRad, bool applyBlur)
+{
+    Mat temp;
+    vector<Vec3f> circles;
+
+    if (applyBlur == true)
+        GaussianBlur(this->grayImage, temp, Size(9, 9), 2, 2);
+    else
+        temp = this->grayImage.clone();
+    HoughCircles(temp, circles, CV_HOUGH_GRADIENT, 1,
+                 temp.rows/8, cannyThresh, detectThresh, minRad, maxRad);
+
+    this->opImage = this->image.clone();
+    for( int i = 0; i < circles.size(); i++ )
+    {
+       Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+       int radius = cvRound(circles[i][2]);
+       // circle center
+       circle( this->opImage, center, 3, Scalar(0,255,0), -1, 8, 0 );
+       // circle outline
+       circle( this->opImage, center, radius, Scalar(0,0,255), 3, 8, 0 );
+     }
+
+}
+

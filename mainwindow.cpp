@@ -130,11 +130,29 @@ void MainWindow::handleCannySignal(int kernel, int threshold, bool applyBlur, bo
     displayOp();
 }
 
+
+void MainWindow::handleHoughLineSignal(
+        int lineMethodIdx, int lineThreshold, int lineRhoRes, int lineThetaRes, bool lineEdgeDetect)
+{
+    ui->OutputLabel->clear();
+    ip->doHoughLineTransform(lineMethodIdx, lineThreshold, lineRhoRes, lineThetaRes, lineEdgeDetect);
+    displayOp();
+}
+
+void MainWindow::handleHoughCircleSignal(double circleCannyThresh, double circleDetectThresh,
+        int circleMinRad, int circleMaxRad, bool circleApplyBlur)
+{
+    ui->OutputLabel->clear();
+    ip->doHoughCircleTransform(circleCannyThresh, circleDetectThresh, circleMinRad,
+                               circleMaxRad, circleApplyBlur);
+    displayOp();
+}
+
 void MainWindow::handleImageOpen()
 {
     //QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
     //ip->image = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
-    ip->image = imread("/Users/shreya/Desktop/1_nature.jpg");
+    ip->image = imread("/Users/shreya/Desktop/6_circles.jpg");
 
     if(! ip->image.data )
     {
@@ -317,6 +335,22 @@ void MainWindow::on_actionCanny_triggered()
             this, SLOT(handleCannySignal(int,int,bool,bool)));
 
     cd->show();
+}
+
+
+void MainWindow::on_actionHough_triggered()
+{
+    // check
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    // create new hough dialog
+    HoughDialog * hd = new HoughDialog;
+    connect(hd,   SIGNAL(sendHoughLineVals(int,int,int,int,bool)),
+            this, SLOT(handleHoughLineSignal(int,int,int,int,bool)));
+    connect(hd,   SIGNAL(sendHoughCircleVals(double,double,int,int,bool)),
+            this, SLOT(handleHoughCircleSignal(double,double,int,int,bool)));
+
+    hd->show();
 }
 
 

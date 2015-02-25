@@ -400,19 +400,11 @@
     <property name="title">
      <string>Operations</string>
     </property>
-    <widget class="QMenu" name="menuHough">
-     <property name="title">
-      <string>Hough</string>
-     </property>
-     <addaction name="actionLines"/>
-     <addaction name="actionCircles"/>
-    </widget>
     <addaction name="action_Filter"/>
     <addaction name="actionAdd_Noise"/>
     <addaction name="actionMorphology"/>
     <addaction name="actionColour_Space"/>
     <addaction name="actionBlur"/>
-    <addaction name="menuHough"/>
     <addaction name="actionContrast"/>
     <addaction name="actionBrighten"/>
     <addaction name="actionThreshold"/>
@@ -424,6 +416,7 @@
     <addaction name="actionCanny"/>
     <addaction name="separator"/>
     <addaction name="actionSobel"/>
+    <addaction name="actionHough"/>
    </widget>
    <widget class="QMenu" name="menuExtract">
     <property name="title">
@@ -521,16 +514,6 @@
     <string>Blur</string>
    </property>
   </action>
-  <action name="actionLines">
-   <property name="text">
-    <string>Lines</string>
-   </property>
-  </action>
-  <action name="actionCircles">
-   <property name="text">
-    <string>Circles</string>
-   </property>
-  </action>
   <action name="actionContrast">
    <property name="text">
     <string>Contrast</string>
@@ -579,6 +562,11 @@
   <action name="actionLaplacian">
    <property name="text">
     <string>Laplacian</string>
+   </property>
+  </action>
+  <action name="actionHough">
+   <property name="text">
+    <string>Hough</string>
    </property>
   </action>
  </widget>

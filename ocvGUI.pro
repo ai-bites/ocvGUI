@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     Dialogs/blurdialog.cpp \
     Dialogs/colourdialog.cpp \
     Dialogs/sobeldialog.cpp \
-    Dialogs/cannydialog.cpp
+    Dialogs/cannydialog.cpp \
+    Dialogs/houghdialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
@@ -32,7 +33,8 @@ HEADERS  += mainwindow.h \
     Dialogs/blurdialog.h \
     Dialogs/colourdialog.h \
     Dialogs/sobeldialog.h \
-    Dialogs/cannydialog.h
+    Dialogs/cannydialog.h \
+    Dialogs/houghdialog.h
 
 INCLUDEPATH += /usr/local/include
 
@@ -49,4 +51,5 @@ FORMS    += mainwindow.ui \
     Dialogs/colourdialog.ui \
     Dialogs/blurdialog.ui \
     Dialogs/sobeldialog.ui \
-    Dialogs/cannydialog.ui
+    Dialogs/cannydialog.ui \
+    Dialogs/houghdialog.ui

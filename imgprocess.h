@@ -16,6 +16,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
+#include <stdio.h>
 
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
@@ -47,6 +48,13 @@ public:
     void doSobelAndLapOper(int, bool, int, int, int, double, int, int);
     // Do canny edge detection
     void doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad);
+    // Do hough transform for extracting lines
+    void doHoughLineTransform(
+            int lineMethodIdx, int lineThreshold,
+            int lineRhoRes, int lineThetaRes, bool lineEdgeDetect);
+    // Do hough transform for circles
+    void doHoughCircleTransform(
+            double cannyThresh, double detectThresh, int minRad, int maxRad, bool applyBlur);
 };
 
 #endif // IMGPROCESS_H

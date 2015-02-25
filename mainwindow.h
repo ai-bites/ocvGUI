@@ -31,6 +31,7 @@
 #include "Dialogs/blurdialog.h"
 #include "Dialogs/sobeldialog.h"
 #include "Dialogs/cannydialog.h"
+#include "Dialogs/houghdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -71,6 +72,9 @@ private slots:
                                  int kernel, int dx, int dy, double dxWeight,
                                  int delta,int scale);
     void handleCannySignal(int kernel, int threshold, bool applyBlur, bool isL2Grad);
+    void handleHoughLineSignal(int,int,int,int,bool);
+    void handleHoughCircleSignal(double, double,int, int, bool);
+
 
     void handleImageOpen();
     void handleVideoOpen(VideoCapture capture);
@@ -91,6 +95,8 @@ private slots:
     void on_actionSobel_triggered();
 
     void on_actionCanny_triggered();
+
+    void on_actionHough_triggered();
 
 private:
     Ui::MainWindow *ui;
