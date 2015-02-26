@@ -148,13 +148,30 @@ void MainWindow::handleHoughCircleSignal(double circleCannyThresh, double circle
     displayOp();
 }
 
+void MainWindow::handleHarrisSignal(int blockSize, int aperture, double kValue, int threshold)
+{
+    ui->OutputLabel->clear();
+    ip->doHarrisCorner(blockSize, aperture, kValue, threshold);
+    displayOp();
+}
+
+void MainWindow::handleFeatureVals(int threshold, int methodIdx,
+                                   double siftThresh, double siftLineSensThresh,
+                                   double surfThresh)
+{
+    cout << "in handle feature vals" << endl;
+    ui->OutputLabel->clear();
+    ip->doFeatureExtract(threshold, methodIdx, siftThresh, siftLineSensThresh, surfThresh);
+    displayOp();
+}
+
 void MainWindow::handleImageOpen()
 {
     //QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
     //ip->image = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
-    ip->image = imread("/Users/shreya/Desktop/6_circles.jpg");
+    ip->image = imread("/Users/shreya/Desktop/1_nature.jpg");
 
-    if(! ip->image.data )
+    if(! ip->image.data)
     {
         cout <<  "Could not open or find the image" << endl;
         return;
@@ -302,7 +319,7 @@ void MainWindow::on_actionBlur_triggered()
     if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
 
     // create a new blurring dialog
-    BlurDialog * bd = new BlurDialog;
+    BlurDialog * bd = new BlurDialog(this);
     connect(bd, SIGNAL(sendBlurVals(int,int,int,double,double,int)),
             this, SLOT(handleBlurDialogSignal(int,int,int,double,double,int)));
 
@@ -316,7 +333,7 @@ void MainWindow::on_actionSobel_triggered()
     if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
 
     // create a new window for parameters
-    SobelDialog * sd = new SobelDialog;
+    SobelDialog * sd = new SobelDialog(this);
     connect(sd, SIGNAL(sendSobelVals(int,bool,int,int,int,double,int,int)),
             this, SLOT(handleSobelDialogSignal(int,bool,int,int,int,double,int,int)));
 
@@ -330,7 +347,7 @@ void MainWindow::on_actionCanny_triggered()
     if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
 
     // create dialog for canny operation params
-    CannyDialog * cd = new CannyDialog;
+    CannyDialog * cd = new CannyDialog(this);
     connect(cd, SIGNAL(sendCannyVals(int,int,bool,bool)),
             this, SLOT(handleCannySignal(int,int,bool,bool)));
 
@@ -344,7 +361,7 @@ void MainWindow::on_actionHough_triggered()
     if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
 
     // create new hough dialog
-    HoughDialog * hd = new HoughDialog;
+    HoughDialog * hd = new HoughDialog(this);
     connect(hd,   SIGNAL(sendHoughLineVals(int,int,int,int,bool)),
             this, SLOT(handleHoughLineSignal(int,int,int,int,bool)));
     connect(hd,   SIGNAL(sendHoughCircleVals(double,double,int,int,bool)),
@@ -353,6 +370,31 @@ void MainWindow::on_actionHough_triggered()
     hd->show();
 }
 
+
+void MainWindow::on_actionCorners_triggered()
+{
+    // check
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    // create new dialog for harris parameters
+    HarrisDialog * hd = new HarrisDialog(this);
+    connect(hd, SIGNAL(sendHarrisVals(int,int,double,int)),
+            this, SLOT(handleHarrisSignal(int,int,double,int)));
+
+    hd->show();
+}
+
+void MainWindow::on_actionFAST_triggered()
+{
+    // check
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    FeaturesDialog * fd = new FeaturesDialog(this);
+    connect(fd, SIGNAL(sendFeatureVals(int,int,double,double,double)),
+            this, SLOT(handleFeatureVals(int,int,double,double,double)));
+
+    fd->show();
+}
 
 //! End ************************************************!//
 
@@ -426,3 +468,4 @@ void MainWindow::on_pushButton_clicked()
 }
 
 //! End ************************************************!//
+

@@ -32,6 +32,8 @@
 #include "Dialogs/sobeldialog.h"
 #include "Dialogs/cannydialog.h"
 #include "Dialogs/houghdialog.h"
+#include "Dialogs/harrisdialog.h"
+#include "Dialogs/featuresdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -74,7 +76,8 @@ private slots:
     void handleCannySignal(int kernel, int threshold, bool applyBlur, bool isL2Grad);
     void handleHoughLineSignal(int,int,int,int,bool);
     void handleHoughCircleSignal(double, double,int, int, bool);
-
+    void handleHarrisSignal(int blockSize, int aperture, double kValue, int threshold);
+    void handleFeatureVals(int, int, double, double, double);
 
     void handleImageOpen();
     void handleVideoOpen(VideoCapture capture);
@@ -97,6 +100,10 @@ private slots:
     void on_actionCanny_triggered();
 
     void on_actionHough_triggered();
+
+    void on_actionCorners_triggered();
+
+    void on_actionFAST_triggered();
 
 private:
     Ui::MainWindow *ui;

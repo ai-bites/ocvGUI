@@ -15,11 +15,14 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+
 #include <iostream>
 #include <stdio.h>
 
-#include <stdlib.h>     /* srand, rand */
-#include <time.h>       /* time */
+//#include <stdlib.h>     /* srand, rand */
+//#include <time.h>       /* time */
 
 #include <qglobal.h>
 
@@ -55,6 +58,12 @@ public:
     // Do hough transform for circles
     void doHoughCircleTransform(
             double cannyThresh, double detectThresh, int minRad, int maxRad, bool applyBlur);
+    // Do harris corner extraction
+    void doHarrisCorner(int blockSize, int aperture,double kValue, int threshold);
+    // Do feature extraction using FAST extractor
+    void doFeatureExtract(int fastThresh, int methodIdx,
+                          double surfThresh, double siftThresh, double lineSensThresh);
+
 };
 
 #endif // IMGPROCESS_H

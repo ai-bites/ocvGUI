@@ -23,7 +23,10 @@ SOURCES += main.cpp\
     Dialogs/colourdialog.cpp \
     Dialogs/sobeldialog.cpp \
     Dialogs/cannydialog.cpp \
-    Dialogs/houghdialog.cpp
+    Dialogs/houghdialog.cpp \
+    Dialogs/harrisdialog.cpp \
+    Dialogs/featuresdialog.cpp \
+    camera.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
@@ -34,7 +37,10 @@ HEADERS  += mainwindow.h \
     Dialogs/colourdialog.h \
     Dialogs/sobeldialog.h \
     Dialogs/cannydialog.h \
-    Dialogs/houghdialog.h
+    Dialogs/houghdialog.h \
+    Dialogs/harrisdialog.h \
+    Dialogs/featuresdialog.h \
+    camera.h
 
 INCLUDEPATH += /usr/local/include
 
@@ -43,7 +49,8 @@ LIBS += -L/usr/local/lib \
    -lopencv_highgui \
    -lopencv_imgproc \
    -lopencv_features2d \
-   -lopencv_calib3d
+   -lopencv_calib3d \
+   -lopencv_nonfree
 
 FORMS    += mainwindow.ui \
     morphologydialog.ui \
@@ -52,4 +59,6 @@ FORMS    += mainwindow.ui \
     Dialogs/blurdialog.ui \
     Dialogs/sobeldialog.ui \
     Dialogs/cannydialog.ui \
-    Dialogs/houghdialog.ui
+    Dialogs/houghdialog.ui \
+    Dialogs/harrisdialog.ui \
+    Dialogs/featuresdialog.ui

@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include "camera.h"
 
 int main(int argc, char *argv[])
 {
@@ -7,6 +8,9 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     //w.setWindowState(Qt::WindowMaximized);
-    w.show();
+    //w.show();
+    Camera * c = new Camera;
+    c->calibrate();
+
     return a.exec();
 }

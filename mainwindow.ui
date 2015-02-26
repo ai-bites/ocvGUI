@@ -536,12 +536,12 @@
   </action>
   <action name="actionCorners">
    <property name="text">
-    <string>Corners</string>
+    <string>Harris Corners</string>
    </property>
   </action>
   <action name="actionFAST">
    <property name="text">
-    <string>FAST</string>
+    <string>Features</string>
    </property>
   </action>
   <action name="actionSURF">

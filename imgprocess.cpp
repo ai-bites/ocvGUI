@@ -253,3 +253,60 @@ void ImgProcess::doHoughCircleTransform(
 
 }
 
+
+void ImgProcess::doHarrisCorner(int blockSize, int aperture,double kValue, int threshold)
+{
+    Mat temp, tempNorm, tempNormScaled;
+    cornerHarris(this->grayImage,temp, blockSize, aperture, kValue);
+    //cout << "sample corner op: " << temp.at<int>(10,10) << endl;
+
+    normalize(temp, tempNorm, 0, 255, NORM_MINMAX, CV_32FC1);
+    //cout << "normalized sample: " << tempNorm.at<int>(10,10) << endl;
+    convertScaleAbs(tempNorm, tempNormScaled);
+    //cout << "converted scaled: " << tempNormScaled.at<int>(10,10) << endl;
+
+    for (int i = 0; i < tempNorm.rows; i++)
+    {
+        for (int j = 0; j < tempNorm.cols; j++)
+        {
+            if (int(tempNorm.at<float>(i,j)) > threshold)
+                circle(tempNormScaled, Point(i,j), 5, Scalar(0),2,8,0);
+        }
+    }
+    this->opImage = tempNormScaled.clone();
+
+}
+
+
+void ImgProcess::doFeatureExtract(int fastThresh, int methodIdx,
+                                  double siftThresh, double siftLineSensthresh, double surfThresh)
+{
+    std::vector<cv::KeyPoint> keypoints;
+    this->opImage = image.clone();
+    cout << "vals are: " << siftThresh << " " << siftLineSensthresh << endl;
+
+    if (methodIdx == 1) // FAST
+    {
+        cv::FastFeatureDetector fast(fastThresh);
+        fast.detect(this->image, keypoints);
+        // draw white coloured keypoints
+        cv::drawKeypoints(image,keypoints,this->opImage,
+                          cv::Scalar(255,255,255), cv::DrawMatchesFlags::DRAW_OVER_OUTIMG);
+    }
+    if (methodIdx == 2) // SURF
+    {
+        SurfFeatureDetector surf(surfThresh);
+        surf.detect(this->image, keypoints);
+        cv::drawKeypoints(image,keypoints,this->opImage,
+                          cv::Scalar(255,255,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    }
+    if (methodIdx == 3) // SIFT
+    {
+        cv::SiftFeatureDetector sift(siftThresh, siftLineSensthresh);
+        sift.detect(this->image, keypoints);
+        cv::drawKeypoints(image,keypoints,this->opImage,
+                          cv::Scalar(255,255,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    }
+
+}
+
