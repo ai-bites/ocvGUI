@@ -26,7 +26,9 @@ SOURCES += main.cpp\
     Dialogs/houghdialog.cpp \
     Dialogs/harrisdialog.cpp \
     Dialogs/featuresdialog.cpp \
-    camera.cpp
+    camera.cpp \
+    Dialogs/histogramdialog.cpp \
+    Dialogs/matchesdialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
@@ -40,7 +42,9 @@ HEADERS  += mainwindow.h \
     Dialogs/houghdialog.h \
     Dialogs/harrisdialog.h \
     Dialogs/featuresdialog.h \
-    camera.h
+    camera.h \
+    Dialogs/histogramdialog.h \
+    Dialogs/matchesdialog.h
 
 INCLUDEPATH += /usr/local/include
 
@@ -50,15 +54,21 @@ LIBS += -L/usr/local/lib \
    -lopencv_imgproc \
    -lopencv_features2d \
    -lopencv_calib3d \
-   -lopencv_nonfree
+   -lopencv_nonfree \
+   -lopencv_flann
 
 FORMS    += mainwindow.ui \
-    morphologydialog.ui \
-    noisedialog.ui \
+    Dialogs/morphologydialog.ui \
+    Dialogs/noisedialog.ui \
     Dialogs/colourdialog.ui \
     Dialogs/blurdialog.ui \
     Dialogs/sobeldialog.ui \
     Dialogs/cannydialog.ui \
     Dialogs/houghdialog.ui \
     Dialogs/harrisdialog.ui \
-    Dialogs/featuresdialog.ui
+    Dialogs/featuresdialog.ui \
+    Dialogs/histogramdialog.ui \
+    Dialogs/matchesdialog.ui
+
+RESOURCES += \
+    images.qrc

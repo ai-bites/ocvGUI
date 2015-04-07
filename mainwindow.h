@@ -22,6 +22,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/stitching/stitcher.hpp>
 
 #include "imgprocess.h"
 #include "videoprocess.h"
@@ -34,6 +35,9 @@
 #include "Dialogs/houghdialog.h"
 #include "Dialogs/harrisdialog.h"
 #include "Dialogs/featuresdialog.h"
+#include "Dialogs/histogramdialog.h"
+#include "Dialogs/matchesdialog.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -51,11 +55,20 @@ public:
     ImgProcess * ip;
     VideoProcess * vp;
     VideoCapture cap;
+    QThread * currentThread;
 
 signals:
     void sendVideoIpImage(QImage);
     void sendCapture();
     void sendMorpOper(QString, int, int);
+    void sendAddNoiseParams(QString,int,int,double,double);
+    void sendColorSpaceParams(int);
+    void sendBlur(int idx,int kernelL,
+          int kernelH, double sigmaX, double sigmaY,int medianKernel);
+    void sendSobelParams(int,bool,int,int,int,double,int,int);
+    void sendCannyParams(int,int,bool,bool);
+
+
 
 private slots:
     // all actions triggered from tools menu
@@ -67,7 +80,7 @@ private slots:
 
     // All handlers for signals emitted from dialog boxes
     void handleMorphSignal(QString choice, int h, int w);
-    void handleSnPNoiseSignal(QString name, int n);
+    void handleAddNoise(QString method, int, int, double, double);
     void handleColorDialogSignal(int idx);
     void handleBlurDialogSignal(int idx, int, int, double, double, int);
     void handleSobelDialogSignal(int currentIdx, bool applyBlur,
@@ -78,12 +91,15 @@ private slots:
     void handleHoughCircleSignal(double, double,int, int, bool);
     void handleHarrisSignal(int blockSize, int aperture, double kValue, int threshold);
     void handleFeatureVals(int, int, double, double, double);
+    void handleHistogram(int, bool showHistEqImg);
+    void handleMatchImages(cv::Mat firstImg, cv::Mat secondImg, bool isShow, string toDisplay);
 
     void handleImageOpen();
     void handleVideoOpen(VideoCapture capture);
 
+    void displayImage(Mat, Mat, string);
 
-    void on_pushButton_clicked();
+    //void on_pushButton_clicked();
 
     void on_StartLiveCheckBox_clicked(bool checked);
 
@@ -105,12 +121,19 @@ private slots:
 
     void on_actionFAST_triggered();
 
+    void on_actionHistogram_triggered();
+
+    void on_saveOutput_clicked();
+
+    void on_actionMatches_triggered();
+
+    void on_closeButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     void displayOp();
     bool isVideoStopped;
 
-    QThread * currentThread;
 
 };
 

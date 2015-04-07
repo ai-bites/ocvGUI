@@ -1,7 +1,6 @@
 #include "imgprocess.h"
 
 using namespace std;
-using namespace cv;
 
 ImgProcess::ImgProcess()
 {
@@ -12,7 +11,7 @@ void ImgProcess::doMorphOper(QString name, int l=5, int b=5)
 {
     if (name.toStdString() == "Open")
     {
-        cout << "in do morph open" << "l is: " << l << endl;
+        //cout << "in do morph open" << "l is: " << l << endl;
         cv::Mat elem(l,b,CV_8U,cv::Scalar(1));
         cv::morphologyEx(this->grayImage,this->opImage,cv::MORPH_OPEN,elem);
     }
@@ -38,31 +37,29 @@ void ImgProcess::doMorphOper(QString name, int l=5, int b=5)
 }
 
 
-void ImgProcess::addNoise(QString type, int val)
+void ImgProcess::addNoise(QString type, int whiteVal, int blackVal, double mean, double var)
 {
-    this->opImage = this->grayImage;
 
-    if (type.toStdString() == "SALT_AND_PEPPER")
+    if (type.toStdString() == "Salt and Pepper")
     {
-        for (int k = 0; k <= val; k++)
-        {
-            int a = (QString::number(qrand() % ((grayImage.rows + 1)) + 10)).toInt();
-            int b = (QString::number(qrand() % ((grayImage.cols + 1)) + 10)).toInt();
-            int c = (QString::number(qrand() % ((grayImage.rows + 1)) + 10)).toInt();
-            int d = (QString::number(qrand() % ((grayImage.cols + 1)) + 10)).toInt();
+        //cout << "adding snp noise " << endl;
+        Mat snpNoise = Mat::zeros(this->grayImage.rows, this->grayImage.cols,CV_8U);
+        randu(snpNoise,0,255);
 
-            if(this->opImage.channels() == 1)
-            {
-                // salt
-                this->opImage.at<uchar>(a,b) = 255;
-                // pepper
-                this->opImage.at<uchar>(c,d) = 0;
-            }
-        }
+        Mat black = snpNoise < (255 - whiteVal);
+        Mat white = snpNoise > (255 - blackVal);
+
+        snpNoise.setTo(0,black);
+        snpNoise.setTo(255,white);
+
+        this->opImage = this->grayImage + snpNoise.clone();
     }
-    else if (type == "GAUSSIAN")
+    else if (type.toStdString() == "Gaussian")
     {
-        //TODO: add gaussian filtering
+        Mat gaussImg = Mat::zeros(this->grayImage.rows, this->grayImage.cols,CV_8U);
+        randn(gaussImg,mean,var);
+        this->opImage = gaussImg.clone();
+        this->opImage = this->grayImage.clone() + gaussImg;
     }
     return;
 }
@@ -110,6 +107,7 @@ void ImgProcess::toColourSpace(int idx)
     {
         cvtColor(image, opImage, CV_RGB2HLS);
     }
+    cout << "done with conversion" << endl;
 }
 
 
@@ -142,12 +140,19 @@ void ImgProcess::doSobelAndLapOper(int currentIdx, bool applyBlur,
     if (applyBlur == true)
     {
         GaussianBlur( this->image, temp, Size(3,3), 0, 0, BORDER_DEFAULT);
-        cvtColor(temp, grayTemp, CV_RGB2GRAY);
+        if (temp.channels() == 3)
+        {
+            cvtColor(temp, grayTemp, CV_RGB2GRAY);
+        }
     }
     else
     {
-        temp = this->image.clone();
-        grayTemp = this->image.clone();
+        if (this->image.channels() == 3)
+        {
+            cvtColor(this->image, grayTemp, CV_RGB2GRAY);
+        }
+        else
+            grayTemp = this->grayImage.clone();
     }
 
     if (currentIdx == 1) // sobel
@@ -254,6 +259,57 @@ void ImgProcess::doHoughCircleTransform(
 }
 
 
+void ImgProcess::doHistogram(int numBins, bool showHistEqImg)
+{
+    if (showHistEqImg)
+    {
+        cv::equalizeHist(this->grayImage, this->opImage);
+        return;
+    }
+
+    // init paramters needed later
+    //float hranges[2];
+    int histSize[0];
+    cv::MatND hist;
+
+    //hranges[0] = 0.0;
+    //hranges[1] = 255.0;
+    float hranges[] = {0.0, 255.0};
+    const float* ranges[] = {hranges};
+    histSize[0] = numBins;
+    int channels[] = {0};
+
+    cv::calcHist(&(this->grayImage),
+                1,           // histogram from 1 image only
+                channels,  // the channel used
+                cv::Mat(), // no mask is used
+                hist,        // the resulting histogram
+                1,           // it is a 1D histogram
+                histSize,  // number of bins
+                ranges     // pixel value range
+    );
+
+    // now create bar graphs for dispaying histogram data, hist
+    double maxVal=0;
+    double minVal=0;
+
+    cv::minMaxLoc(hist, &minVal, &maxVal, 0, 0);
+    cv::Mat histImg(histSize[0], histSize[0], CV_8U, cv::Scalar(255));
+    int hpt = static_cast<int>(0.9*histSize[0]);
+
+    for (int h = 0; h < histSize[0]; h++)
+    {
+        float binVal = hist.at<float>(h);
+        int intensity = static_cast<int>(binVal*hpt/maxVal);
+        cv::line(histImg,cv::Point(h,histSize[0]), cv::Point(h, histSize[0]-intensity), cv::Scalar::all(0));
+    }
+
+    cv::resize(histImg, this->opImage, this->grayImage.size());
+
+}
+
+
+
 void ImgProcess::doHarrisCorner(int blockSize, int aperture,double kValue, int threshold)
 {
     Mat temp, tempNorm, tempNormScaled;
@@ -281,9 +337,7 @@ void ImgProcess::doHarrisCorner(int blockSize, int aperture,double kValue, int t
 void ImgProcess::doFeatureExtract(int fastThresh, int methodIdx,
                                   double siftThresh, double siftLineSensthresh, double surfThresh)
 {
-    std::vector<cv::KeyPoint> keypoints;
     this->opImage = image.clone();
-    cout << "vals are: " << siftThresh << " " << siftLineSensthresh << endl;
 
     if (methodIdx == 1) // FAST
     {
@@ -307,6 +361,237 @@ void ImgProcess::doFeatureExtract(int fastThresh, int methodIdx,
         cv::drawKeypoints(image,keypoints,this->opImage,
                           cv::Scalar(255,255,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
     }
+
+}
+
+
+void ImgProcess::computeFundMatrix(int methodIdx)
+{
+    Mat imgOne, imgTwo;
+    std::vector<cv::KeyPoint> imgOneKeyPts, imgTwoKeyPts;
+    std::vector<cv::Point2f> imgOneKpFlt, imgTwoKpFlt;
+    cv::Mat fundMatrix;
+
+    this->image = cv::imread("/Users/shreya/Documents/workspace/cpp/ocvGUI/images/fm_1.png");
+    this->doFeatureExtract(0, 2, 0.0, 0.0, 200.);
+    imgOneKeyPts = getKeyPoints();
+    imgOne = this->image.clone();
+
+    this->image = cv::imread("/Users/shreya/Documents/workspace/cpp/ocvGUI/images/fm_2.png");
+    this->doFeatureExtract(0, 2, 0.0, 0.0, 200.);
+    imgTwoKeyPts = this->getKeyPoints();
+    imgTwo = this->image.clone();
+
+    cout << "before conversion" << endl;
+    // convert keypoints for computation
+    cv::KeyPoint::convert(imgOneKpFlt, imgOneKeyPts);
+    cv::KeyPoint::convert(imgTwoKpFlt, imgOneKeyPts);
+
+    cout << "after conv" << endl;
+
+    if (methodIdx == 1) // 7 point
+    {
+        fundMatrix = cv::findFundamentalMat(cv::Mat(imgOneKpFlt), cv::Mat(imgTwoKpFlt),CV_FM_7POINT);
+    }
+    if (methodIdx == 2) // 8 point
+    {
+        fundMatrix = cv::findFundamentalMat(imgOneKpFlt, imgTwoKpFlt, CV_FM_8POINT);
+    }
+    if (methodIdx == 3) // RANSAC
+    {
+        fundMatrix = cv::findFundamentalMat(imgOneKpFlt, imgTwoKpFlt,  FM_RANSAC);
+    }
+    //this->drawEpipolarLines(fundMatrix, cv::Mat(imgOneKpFlt), imgTwo);
+}
+
+
+void ImgProcess::doMatchImages(Mat firstImg, Mat secondImg, bool isShow)
+{
+    //-- Step 1: Detect the keypoints using SURF Detector
+    int minHessian = 400;
+    SurfFeatureDetector detector( minHessian );
+    std::vector<KeyPoint> keyPtsOne, keyPtsTwo;
+
+    detector.detect( firstImg, keyPtsOne );
+    detector.detect( secondImg, keyPtsTwo );
+
+    //-- Step 2: Calculate descriptors (feature vectors)
+    SurfDescriptorExtractor extractor;
+
+    Mat descOne, descTwo;
+
+    extractor.compute( firstImg, keyPtsOne, descOne );
+    extractor.compute( secondImg, keyPtsTwo, descTwo );
+
+    std::vector< DMatch > goodMatches = doFlannMatching(descOne, descTwo);
+
+    Mat finalMatches;
+    drawMatches(firstImg, keyPtsOne, secondImg, keyPtsTwo,
+                 goodMatches, finalMatches, Scalar::all(-1), Scalar::all(-1),
+                 vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+
+    Size sz = firstImg.size();
+    resize(finalMatches, finalMatches, sz);
+    imshow( "Good Matches", finalMatches );
+}
+
+std::vector< DMatch > ImgProcess::doFlannMatching(Mat descOne, Mat descTwo)
+{
+    // Matching descriptor vectors using FLANN matcher
+    FlannBasedMatcher matcher;
+    std::vector< DMatch > matches;
+    matcher.match( descOne, descTwo, matches );
+
+    double max_dist = 0;
+    double min_dist = 100;
+
+    // Quick calculation of max and min distances between keypoints
+    for( int i = 0; i < descOne.rows; i++ )
+    {
+        double dist = matches[i].distance;
+        if( dist < min_dist ) min_dist = dist;
+        if( dist > max_dist ) max_dist = dist;
+    }
+    std::vector< DMatch > goodMatches;
+
+    for( int i = 0; i < descOne.rows; i++ )
+    {
+        if( matches[i].distance <= max(2*min_dist, 0.02) )
+        {
+            goodMatches.push_back( matches[i]);
+        }
+    }
+    return goodMatches;
+}
+
+void ImgProcess::computeHomography()
+{
+    cout << "computing homography" << endl;
+    Mat imgOne, imgTwo;
+    std::vector<cv::KeyPoint> imgOneKeyPts, imgTwoKeyPts;
+    std::vector<cv::Point2f> imgOneKpFlt, imgTwoKpFlt;
+    cv::Mat fundMatrix;
+
+    std::vector<KeyPoint> keyPtsOne, keyPtsTwo;
+    std::vector<cv::DMatch> matches;
+
+    this->image = cv::imread("/Users/shreya/Desktop/test_images/table_1.jpg");
+    this->doFeatureExtract(0, 2, 0.0, 0.0, 200.);
+    imgOneKeyPts = getKeyPoints();
+    imgOne = this->image.clone();
+
+    this->opImage = cv::imread("/Users/shreya/Desktop/test_images/table_2.jpg");
+    this->doFeatureExtract(0, 2, 0.0, 0.0, 200.);
+    imgTwoKeyPts = this->getKeyPoints();
+    imgTwo = this->opImage.clone();
+
+
+
+    cout << "got images" << endl;
+    int minHessian = 400;
+    SurfFeatureDetector detector( minHessian );
+
+    detector.detect( this->image, keyPtsOne );
+    detector.detect( this->opImage, keyPtsTwo );
+
+    // Calculate descriptors (feature vectors)
+    SurfDescriptorExtractor extractor;
+
+    Mat descOne, descTwo;
+
+    extractor.compute( this->image, keyPtsOne, descOne );
+    extractor.compute( this->opImage, keyPtsTwo, descTwo );
+
+    cout << "got desc" << endl;
+
+    std::vector< DMatch > goodMatches = doFlannMatching(descOne, descTwo);
+    cout << "got matches" << goodMatches.size() << endl;
+    cout << "keypoints 1 count" << imgOneKeyPts.size() << endl;
+    cout << "kpts 2 count" << imgTwoKeyPts.size() << endl;
+
+
+    // convert to points 2f vector to use for homography computation
+    std::vector< cv::Point2f > points1, points2;
+    cout << "after declaration" << endl;
+    for( std::vector<cv::KeyPoint>::const_iterator it = imgOneKeyPts.begin(); it!= imgOneKeyPts.end();it++)
+    {
+        points1.push_back(it->pt);
+    }
+    for( std::vector<cv::KeyPoint>::const_iterator it = imgTwoKeyPts.begin(); it!= imgTwoKeyPts.end();it++)
+    {
+        points2.push_back(it->pt);
+    }
+
+    cout << "created points 1 and points 2" << endl;
+
+    std::vector<uchar> inliers(points1.size(),0);
+    cv::Mat homography = cv::findHomography(
+            cv::Mat(points1),
+            cv::Mat(points2), // corresponding points
+            inliers,	// outputed inliers matches
+            CV_RANSAC,	// RANSAC method
+            1.);	    // max distance to reprojection point
+
+    cout << "computed homography !" << endl;
+
+    // Draw the inlier points
+    std::vector<cv::Point2f>::const_iterator itPts = points1.begin();
+    std::vector<uchar>::const_iterator itIn= inliers.begin();
+    while (itPts != points1.end())
+    {
+        // draw a circle at each inlier location
+        if (*itIn)
+            cv::circle(this->opImage,*itPts,3,cv::Scalar(255,255,255),2);
+
+        ++itPts;
+        ++itIn;
+    }
+
+    itPts= points2.begin();
+    itIn= inliers.begin();
+    while (itPts!=points2.end())
+    {
+        // draw a circle at each inlier location
+        if (*itIn) cv::circle(this->image,*itPts,3,cv::Scalar(255,255,255),2);
+
+        ++itPts;
+        ++itIn;
+    }
+
+    // Display the images with points
+//    cv::namedWindow("Image 1 Homography Points", CV_WINDOW_NORMAL);
+//    cv::resize(this->opImage, this->opImage, Size(400,400));
+//    cv::imshow("Image 1 Homography Points",this->opImage);
+//    cv::namedWindow("Image 2 Homography Points", CV_WINDOW_NORMAL);
+//    cv::resize(this->image, this->image, Size(400,400));
+//    cv::imshow("Image 2 Homography Points",this->image);
+
+    cv::Mat result;
+    warpPerspective(this->image,result,homography,
+                    cv::Size(this->image.cols+this->opImage.cols,this->image.rows));
+    cv::Mat half(result,cv::Rect(0,0,this->opImage.cols,this->opImage.rows));
+
+    this->opImage.copyTo(half);
+    cv::resize(result, result, Size(400,400));
+    imshow( "Result", result );
+
+    return;
+}
+
+
+void ImgProcess::drawEpipolarLines(Mat fundMatrix, Mat keyPoints, Mat image)
+{
+    // vector of lines
+    std::vector<cv::Vec3f> lines;
+    cv::computeCorrespondEpilines(keyPoints, 1,fundMatrix,lines);
+
+//    for (vector<cv::Vec3f>::const_iterator it= lines.begin();it!=lines.end(); ++it)
+//    {
+//        //
+//        cv::line(image, cv::Point(0,-(*it)[2]/(*it)[1]),
+//                cv::Point(image.cols,-((*it)[2]+(*it)[0]*image.cols)/(*it)[1]),
+//                cv::Scalar(255,255,255));
+//    }
 
 }
 

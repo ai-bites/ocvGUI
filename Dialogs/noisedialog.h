@@ -17,13 +17,14 @@ public:
 
 private slots:
 
-    void on_SnPNoiseSpinBox_valueChanged(int arg1);
+    void on_noiseAddButton_clicked();
 
 private:
     Ui::NoiseDialog *ui;
+    QString currentOption;
 
 signals:
-    void sendSnPNoise(QString name, int);
+    void sendAddNoise(QString currentOption, int, int, double, double);
 };
 
 #endif // NOISEDIALOG_H

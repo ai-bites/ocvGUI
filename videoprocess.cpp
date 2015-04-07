@@ -11,10 +11,11 @@ VideoProcess::VideoProcess()
 void VideoProcess::doMorphOper(QString name, int l=5, int h=5)
 {
     QImage img;
-    //l = 100; h = 100;
+    cout << "in do morph video " << endl;
 
     while (isVideoStopped == false) // it is running
     {
+        cout << "processing morph frames " << endl;
         capture >> frame;
         cvtColor(frame,destFrame,CV_BGR2GRAY);
         this->ip->grayImage = destFrame;
@@ -30,16 +31,126 @@ void VideoProcess::doMorphOper(QString name, int l=5, int h=5)
 }
 
 
+void VideoProcess::addNoise(QString type, int whiteVal, int blackVal, double mean, double var)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        cout << "processing video frames" << endl;
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame;
+        ip->addNoise( type, whiteVal,  blackVal,  mean, var);
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
+void VideoProcess::toColourSpace(int csIdx)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame;
+        this->ip->image = frame;
+        ip->toColourSpace( csIdx );
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
+void VideoProcess::doBlur(int idx, int kernelL, int kernelH,
+                          double sigmaX, double sigmaY, int medianKernel)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame;
+        this->ip->image = frame;
+        ip->doBlur( idx, kernelL, kernelH, sigmaX, sigmaY, medianKernel);
+
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
+
+void VideoProcess::doSobelAndLapOper(int currentIdx, bool applyBlur,
+                                     int kernel, int dx, int dy, double dxWeight,
+                                     int delta,int scale)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame;
+        this->ip->image = frame;
+        ip->doSobelAndLapOper(currentIdx, applyBlur,kernel, dx, dy, dxWeight, delta, scale);
+
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
+
+void VideoProcess::doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame;
+        this->ip->image = frame;
+        ip->doCannyOper(kernel, threshold, applyBlur, isL2Grad);
+
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
 void VideoProcess::displayOpVideo()
 {
     QImage img;
 
-    // Delay between each frame in ms
-    int delay = 100;
     // for all frames in video
     while (!isVideoStopped)
     {
-        cout << "DISPLAY Op VIDEO" << endl;
         capture >> frame;
         cvtColor(frame,destFrame,CV_BGR2GRAY);
         img = QImage((const unsigned char*)(destFrame.data),destFrame.cols,
@@ -47,7 +158,7 @@ void VideoProcess::displayOpVideo()
 
         emit sendVidoeOpImg(img);
         qApp->processEvents();
-        sleep(1);
+        sleep(0.5);
     }
     // Close the video file.
     capture.release();

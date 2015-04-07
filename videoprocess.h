@@ -46,6 +46,11 @@ public slots:
         threads
     **/
     void doMorphOper(QString name, int, int);
+    void addNoise(QString type, int whiteVal, int blackVal, double mean, double var);
+    void toColourSpace(int csIdx);
+    void doBlur(int idx, int kernelL, int kernelH,double sigmaX, double sigmaY, int medianKernel);
+    void doSobelAndLapOper(int,bool,int,int,int,double,int,int);
+    void doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad);
 
 };
 

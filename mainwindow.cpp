@@ -34,9 +34,14 @@ void MainWindow::displayOp()
     // we convert everything to color
     cv::Mat temp;
     if (ip->opImage.channels() == 1)
+    {
         cvtColor(ip->opImage,temp, CV_GRAY2RGB);
+    }
     else
+    {
+        cout << "setting temp" << endl;
         temp = ip->opImage.clone();
+    }
 
     QImage img = QImage((const unsigned char*)(temp.data),
                             temp.cols,temp.rows,QImage::Format_RGB888);
@@ -44,6 +49,54 @@ void MainWindow::displayOp()
     ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
     ui->OutputLabel->setScaledContents(true);
 }
+
+void MainWindow::displayImage(Mat inputImg, Mat outputImg, string whichImg)
+{
+    cout << "in display image" << endl;
+
+    if (whichImg.compare("input") == 0)
+    {
+        cv::Mat temp;
+        if (inputImg.channels() == 1)
+        {
+            cvtColor(inputImg,temp, CV_GRAY2RGB);
+        }
+        else
+        {
+            cout << "setting temp" << endl;
+            temp = inputImg.clone();
+        }
+
+        QImage img = QImage((const unsigned char*)(temp.data),
+                                temp.cols,temp.rows,QImage::Format_RGB888);
+
+        ui->InputLabel->setPixmap(QPixmap::fromImage(img));
+        ui->InputLabel->setScaledContents(true);
+    }
+
+    if (whichImg.compare("output") == 0)
+    {
+        cv::Mat temp;
+        if (outputImg.channels() == 1)
+        {
+            cout << "channels are one" << endl;
+            cvtColor(outputImg,temp, CV_GRAY2RGB);
+        }
+        else
+        {
+            cout << "setting temp" << endl;
+            temp = outputImg.clone();
+        }
+
+        QImage img = QImage((const unsigned char*)(temp.data),
+                                temp.cols,temp.rows,QImage::Format_RGB888);
+
+        ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
+        ui->OutputLabel->setScaledContents(true);
+    }
+    return;
+}
+
 
 
 /*
@@ -89,28 +142,50 @@ void MainWindow::handleMorphSignal(QString choice, int h, int w)
 }
 
 
-void MainWindow::handleSnPNoiseSignal(QString name, int n)
+void MainWindow::handleAddNoise(QString method, int white, int black, double mean, double var)
 {
-    ui->OutputLabel->clear();
-    ip->addNoise(name, n);
-    displayOp();
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->addNoise(method, white, black, mean, var);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendAddNoiseParams(method, white, black, mean, var);
+    }
 }
-
 
 void MainWindow::handleColorDialogSignal(int idx)
 {
-    ui->OutputLabel->clear();
-    ip->toColourSpace(idx);
-    displayOp();
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->toColourSpace(idx);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendColorSpaceParams(idx);
+    }
+
 }
 
 
 void MainWindow::handleBlurDialogSignal(int idx,int kernelL,
                                         int kernelH, double sigmaX, double sigmaY,int medianKernel)
 {
-    ui->OutputLabel->clear();
-    ip->doBlur(idx, kernelL, kernelH, sigmaX, sigmaY, medianKernel);
-    displayOp();
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->doBlur(idx, kernelL, kernelH, sigmaX, sigmaY, medianKernel);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendBlur(idx, kernelL,kernelH,  sigmaX,  sigmaY, medianKernel);
+    }
+
 }
 
 
@@ -118,16 +193,31 @@ void MainWindow::handleSobelDialogSignal(int currentIdx, bool applyBlur,
                                          int kernel, int dx, int dy, double dxWeight,
                                          int delta,int scale)
 {
-    ui->OutputLabel->clear();
-    ip->doSobelAndLapOper(currentIdx, applyBlur, kernel, dx, dy, dxWeight, delta, scale);
-    displayOp();
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->doSobelAndLapOper(currentIdx, applyBlur, kernel, dx, dy, dxWeight, delta, scale);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendSobelParams(currentIdx, applyBlur, kernel, dx, dy, dxWeight, delta, scale);
+    }
 }
 
 void MainWindow::handleCannySignal(int kernel, int threshold, bool applyBlur, bool isL2Grad)
 {
-    ui->OutputLabel->clear();
-    ip->doCannyOper(kernel, threshold, applyBlur, isL2Grad);
-    displayOp();
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->doCannyOper(kernel, threshold, applyBlur, isL2Grad);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendCannyParams( kernel, threshold, applyBlur, isL2Grad);
+    }
+
 }
 
 
@@ -165,11 +255,30 @@ void MainWindow::handleFeatureVals(int threshold, int methodIdx,
     displayOp();
 }
 
+
+void MainWindow::handleMatchImages(cv::Mat firstImg, cv::Mat secondImg, bool isShow, string toDisplay)
+{
+    if (isShow == true)
+    {
+        cout << "in is show" << endl;
+        ip->doMatchImages(firstImg, secondImg, isShow);
+        return;
+    }
+    displayImage(firstImg, secondImg, toDisplay);
+}
+
+void MainWindow::handleHistogram(int numBins, bool showHistEqImg)
+{
+    ui->OutputLabel->clear();
+    ip->doHistogram(numBins, showHistEqImg);
+    displayOp();
+}
+
 void MainWindow::handleImageOpen()
 {
     //QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
     //ip->image = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
-    ip->image = imread("/Users/shreya/Desktop/1_nature.jpg");
+    ip->image = imread("/Users/shreya/Desktop/test_images/2_boat.png");
 
     if(! ip->image.data)
     {
@@ -204,13 +313,10 @@ void MainWindow::handleVideoOpen(VideoCapture capture)
     double rate = capture.get(CV_CAP_PROP_FPS);
     cv::Mat frame;
     cv::Mat destFrame;
-    // Delay between each frame in ms
-    int delay = 100;
 
     // now display the input capture in input window
     while (this->isVideoStopped == false)
     {
-        cout << "input: in while loop" << endl;
         // read next frame if any
         capture >> frame;
         cvtColor(frame,destFrame,CV_BGR2RGB);
@@ -218,7 +324,6 @@ void MainWindow::handleVideoOpen(VideoCapture capture)
               destFrame.cols,destFrame.rows,QImage::Format_RGB888);
 
         emit sendVideoIpImage(img);
-        cout << "input: processing video" << endl;
         qApp->processEvents();
         sleep(0.5);
     }
@@ -237,6 +342,7 @@ void MainWindow::startVideoOp()
     this->currentThread = opVideoThread;
     this->vp->capture = this->cap;
     connect(this, SIGNAL(sendCapture()), this->vp, SLOT(displayOpVideo()));
+    cout << "befor emove to thread - start video op" << endl;
     this->vp->moveToThread(opVideoThread);
 
     // op started as new thread, now send input capture
@@ -247,7 +353,6 @@ void MainWindow::startVideoOp()
 
 void MainWindow::updateVideoIpImage(QImage img)
 {
-    cout << "input: update video" << endl;
     ui->vIpLabel->setPixmap(QPixmap::fromImage(img));
     ui->vIpLabel->setScaledContents(true);
     ui->vIpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
@@ -257,7 +362,6 @@ void MainWindow::updateVideoIpImage(QImage img)
 
 void MainWindow::updateVideoOpImage(QImage img)
 {
-    cout << "output: update video" << endl;
     ui->vOpLabel->setPixmap(QPixmap::fromImage(img));
     ui->vOpLabel->setScaledContents(true);
     ui->vOpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
@@ -278,14 +382,18 @@ void MainWindow::on_actionMorphology_triggered()
             this, SLOT(handleMorphSignal(QString, int, int)));
 
     // it could be a video operation. So setup threads for it.
-    QThread * opMorphThrd;
-    opMorphThrd = new QThread;
-    vp->moveToThread(opMorphThrd);
-    currentThread->exit(0);
-    this->currentThread = opMorphThrd;
-    this->connect(this,   SIGNAL(sendMorpOper(QString, int, int)),
-                  vp, SLOT(doMorphOper(QString, int, int)));
-    opMorphThrd->start();
+    if (this->isVideoLoaded)
+    {
+        QThread * opMorphThrd = new QThread;
+        //vp->moveToThread(opMorphThrd);
+        currentThread->exit(0);
+
+        this->currentThread = opMorphThrd;
+        this->connect(this,SIGNAL(sendMorpOper(QString, int, int)),
+                      this->vp,  SLOT(doMorphOper(QString, int, int)));
+
+        opMorphThrd->start();
+    }
 
     // we are all set for image and video. now show.
     d->show();
@@ -297,7 +405,22 @@ void MainWindow::on_actionAdd_Noise_triggered()
     if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
 
     NoiseDialog * nd = new NoiseDialog(this);
-    connect(nd, SIGNAL(sendSnPNoise(QString,int)), this, SLOT(handleSnPNoiseSignal(QString, int)));
+    connect(nd, SIGNAL(sendAddNoise(QString,int,int,double,double)),
+          this, SLOT(handleAddNoise(QString, int, int, double, double)));
+
+    // it could be a video operation. So setup threads for it.
+    if (this->isVideoLoaded)
+    {
+        cout << "in main, it is video loaded. creating thread" << endl;
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
+
+        this->connect(this,SIGNAL(sendAddNoiseParams(QString,int,int,double,double)),
+                      this->vp,  SLOT(addNoise(QString,int,int,double,double)));
+        t->start();
+    }
+
     nd->show();
 }
 
@@ -310,6 +433,18 @@ void MainWindow::on_actionColour_Space_triggered()
     // create new colour space dialog
     ColourDialog * cd = new ColourDialog(this);
     connect(cd, SIGNAL(sendColorVals(int)), this, SLOT(handleColorDialogSignal(int)));
+
+    if (this->isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
+
+        this->connect(this,SIGNAL(sendColorSpaceParams(int)),
+                      this->vp,  SLOT(toColourSpace(int)));
+        t->start();
+    }
+
     cd->show();
 }
 
@@ -322,6 +457,17 @@ void MainWindow::on_actionBlur_triggered()
     BlurDialog * bd = new BlurDialog(this);
     connect(bd, SIGNAL(sendBlurVals(int,int,int,double,double,int)),
             this, SLOT(handleBlurDialogSignal(int,int,int,double,double,int)));
+
+    if (this->isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
+
+        this->connect(this,SIGNAL(sendBlur(int,int,int,double,double,int)),
+                      this->vp,  SLOT(doBlur(int, int, int,double, double, int)));
+        t->start();
+    }
 
     bd->show();
 }
@@ -337,6 +483,18 @@ void MainWindow::on_actionSobel_triggered()
     connect(sd, SIGNAL(sendSobelVals(int,bool,int,int,int,double,int,int)),
             this, SLOT(handleSobelDialogSignal(int,bool,int,int,int,double,int,int)));
 
+    if (this->isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
+
+        this->connect(this,SIGNAL(sendSobelParams(int,bool,int,int,int,double,int,int)),
+                      this->vp,  SLOT(doSobelAndLapOper(int,bool,int,int,int,double,int,int)));
+
+        t->start();
+    }
+
     sd->show();
 }
 
@@ -350,7 +508,17 @@ void MainWindow::on_actionCanny_triggered()
     CannyDialog * cd = new CannyDialog(this);
     connect(cd, SIGNAL(sendCannyVals(int,int,bool,bool)),
             this, SLOT(handleCannySignal(int,int,bool,bool)));
+    if (isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
 
+        this->connect(this,SIGNAL(sendCannyParams(int,int,bool,bool)),
+                      this->vp,  SLOT(doCannyOper( int,int,bool,bool)));
+
+        t->start();
+    }
     cd->show();
 }
 
@@ -396,6 +564,30 @@ void MainWindow::on_actionFAST_triggered()
     fd->show();
 }
 
+
+
+void MainWindow::on_actionMatches_triggered()
+{
+    if (this->isVideoLoaded == true) return;
+    MatchesDialog * md = new MatchesDialog(this);
+    connect(md, SIGNAL(sendMatchImages(cv::Mat, cv::Mat, bool, string)),
+            this, SLOT(handleMatchImages(cv::Mat, cv::Mat, bool, string)));
+
+    md->show();
+}
+
+
+void MainWindow::on_actionHistogram_triggered()
+{
+    // check
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+    HistogramDialog * hd = new HistogramDialog(this);
+    connect(hd,SIGNAL(sendHistogram(int, bool)),
+            this, SLOT(handleHistogram(int, bool)));
+
+    hd->show();
+}
+
 //! End ************************************************!//
 
 
@@ -421,6 +613,25 @@ void MainWindow::on_action_Open_triggered()
 
 void MainWindow::on_action_Save_triggered()
 {
+    if (isImgLoaded)
+    {
+        QString s = QFileDialog::getSaveFileName(0,"Images (*.png *.xpm *.jpg)",QString(""),
+                        QString("Save file dialog"),0);
+        if (s.toStdString() == "") return;
+
+        cout << "string is: " << s.toStdString() << endl;
+
+       bool res = cv::imwrite(s.toStdString(), ip->opImage);
+       cout << "res is: " << res << endl;
+    }
+    else
+    {
+        cout << "nto an image" << endl;
+        QMessageBox messageBox;
+        messageBox.critical(0,"Warning","Can save only images !");
+        messageBox.setFixedSize(500,200);
+        return;
+    }
 
 }
 
@@ -428,6 +639,7 @@ void MainWindow::on_action_Close_triggered()
 {
     // action to close the window
     this->close();
+    QCoreApplication::quit();
 }
 
 //! End ************************************************!//
@@ -435,7 +647,6 @@ void MainWindow::on_action_Close_triggered()
 //!
 //! All actions from the Main window (save, close and logo)
 //!
-
 void MainWindow::on_StartLiveCheckBox_clicked(bool checked)
 {
     if (checked) // start
@@ -462,10 +673,42 @@ void MainWindow::on_StartLiveCheckBox_clicked(bool checked)
     }
 }
 
-void MainWindow::on_pushButton_clicked()
+//void MainWindow::on_pushButton_clicked()
+//{
+//    this->close();
+//}
+
+
+void MainWindow::on_saveOutput_clicked()
+{
+    if (isImgLoaded)
+    {
+        QString s = QFileDialog::getSaveFileName(0,"Images (*.png *.xpm *.jpg)",QString(""),
+                        QString("Save file dialog"),0);
+        if (s.toStdString() == "") return;
+
+        cout << "string is: " << s.toStdString() << endl;
+
+       bool res = cv::imwrite(s.toStdString(), ip->opImage);
+       cout << "res is: " << res << endl;
+    }
+    else
+    {
+        cout << "not an image" << endl;
+        QMessageBox messageBox;
+        messageBox.critical(0,"Warning","Can save only images !");
+        messageBox.setFixedSize(500,200);
+        return;
+    }
+}
+
+
+void MainWindow::on_closeButton_clicked()
 {
     this->close();
+    QCoreApplication::quit();
 }
+
 
 //! End ************************************************!//
 
