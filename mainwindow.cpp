@@ -224,35 +224,68 @@ void MainWindow::handleCannySignal(int kernel, int threshold, bool applyBlur, bo
 void MainWindow::handleHoughLineSignal(
         int lineMethodIdx, int lineThreshold, int lineRhoRes, int lineThetaRes, bool lineEdgeDetect)
 {
-    ui->OutputLabel->clear();
-    ip->doHoughLineTransform(lineMethodIdx, lineThreshold, lineRhoRes, lineThetaRes, lineEdgeDetect);
-    displayOp();
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->doHoughLineTransform(lineMethodIdx, lineThreshold, lineRhoRes, lineThetaRes, lineEdgeDetect);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendHoughLinesParams(lineMethodIdx, lineThreshold, lineRhoRes, lineThetaRes, lineEdgeDetect);
+    }
+
 }
 
 void MainWindow::handleHoughCircleSignal(double circleCannyThresh, double circleDetectThresh,
         int circleMinRad, int circleMaxRad, bool circleApplyBlur)
 {
-    ui->OutputLabel->clear();
-    ip->doHoughCircleTransform(circleCannyThresh, circleDetectThresh, circleMinRad,
-                               circleMaxRad, circleApplyBlur);
-    displayOp();
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->doHoughCircleTransform(circleCannyThresh, circleDetectThresh, circleMinRad,
+                                   circleMaxRad, circleApplyBlur);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendHoughCirclesParams(circleCannyThresh, circleDetectThresh, circleMinRad,
+                                    circleMaxRad, circleApplyBlur);
+    }
+
 }
 
 void MainWindow::handleHarrisSignal(int blockSize, int aperture, double kValue, int threshold)
 {
-    ui->OutputLabel->clear();
-    ip->doHarrisCorner(blockSize, aperture, kValue, threshold);
-    displayOp();
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->doHarrisCorner(blockSize, aperture, kValue, threshold);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendHarrisParams( blockSize, aperture, kValue, threshold);
+    }
+
 }
 
 void MainWindow::handleFeatureVals(int threshold, int methodIdx,
                                    double siftThresh, double siftLineSensThresh,
                                    double surfThresh)
 {
-    cout << "in handle feature vals" << endl;
-    ui->OutputLabel->clear();
-    ip->doFeatureExtract(threshold, methodIdx, siftThresh, siftLineSensThresh, surfThresh);
-    displayOp();
+
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->doFeatureExtract(threshold, methodIdx, siftThresh, siftLineSensThresh, surfThresh);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendFeatureParams(threshold, methodIdx, siftThresh, siftLineSensThresh,surfThresh);
+    }
+
 }
 
 
@@ -267,11 +300,36 @@ void MainWindow::handleMatchImages(cv::Mat firstImg, cv::Mat secondImg, bool isS
     displayImage(firstImg, secondImg, toDisplay);
 }
 
+
 void MainWindow::handleHistogram(int numBins, bool showHistEqImg)
 {
-    ui->OutputLabel->clear();
-    ip->doHistogram(numBins, showHistEqImg);
-    displayOp();
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->doHistogram(numBins, showHistEqImg);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendHistogramParams(numBins, showHistEqImg);
+    }
+
+}
+
+
+void MainWindow::handleContour(int edgeThresh, bool doBlur, int methodIdx)
+{
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->drawContours(edgeThresh, doBlur, methodIdx);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendContourParams(edgeThresh, doBlur, methodIdx);
+    }
+
 }
 
 void MainWindow::handleImageOpen()
@@ -357,6 +415,7 @@ void MainWindow::updateVideoIpImage(QImage img)
     ui->vIpLabel->setScaledContents(true);
     ui->vIpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
     qApp->processEvents();
+
 }
 
 
@@ -365,11 +424,31 @@ void MainWindow::updateVideoOpImage(QImage img)
     ui->vOpLabel->setPixmap(QPixmap::fromImage(img));
     ui->vOpLabel->setScaledContents(true);
     ui->vOpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
+
+//    cv::Mat temp;
+//    if (ip->opImage.channels() == 1)
+//    {
+//        cvtColor(ip->opImage,temp, CV_GRAY2RGB);
+//    }
+//    else
+//    {
+//        cout << "setting temp" << endl;
+//        temp = ip->opImage.clone();
+//    }
+
+//    QImage img = QImage((const unsigned char*)(temp.data),
+//                            temp.cols,temp.rows,QImage::Format_RGB888);
+
+//    ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
+//    ui->OutputLabel->setScaledContents(true);
+
 }
 
 
 //!
 //! All the triggers for actions from Operations menu
+//! These lead to the creation of a dialog box to change parameters
+//! which pops up as a separate window.
 //!
 void MainWindow::on_actionMorphology_triggered()
 {
@@ -535,10 +614,23 @@ void MainWindow::on_actionHough_triggered()
     connect(hd,   SIGNAL(sendHoughCircleVals(double,double,int,int,bool)),
             this, SLOT(handleHoughCircleSignal(double,double,int,int,bool)));
 
+    if (isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
+
+        this->connect(this,SIGNAL(sendHoughLinesParams(int, int, int, int, bool)),
+                      this->vp,SLOT(doHoughLineTransform(int, int, int, int, bool)));
+        this->connect(this, SIGNAL(sendHoughCirclesParams(double,double,int,int,bool)),
+                      this->vp, SLOT(doHoughCircleTransform(double,double,int,int,bool)));
+        t->start();
+    }
     hd->show();
 }
 
 
+// To be specific, it is Harris corner detection
 void MainWindow::on_actionCorners_triggered()
 {
     // check
@@ -549,6 +641,17 @@ void MainWindow::on_actionCorners_triggered()
     connect(hd, SIGNAL(sendHarrisVals(int,int,double,int)),
             this, SLOT(handleHarrisSignal(int,int,double,int)));
 
+    if (isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
+
+        this->connect(this,SIGNAL(sendHarrisParams(int,int,double,int)),
+                      this->vp,SLOT(doHarrisCorner(int,int,double,int)));
+
+        t->start();
+    }
     hd->show();
 }
 
@@ -561,9 +664,69 @@ void MainWindow::on_actionFAST_triggered()
     connect(fd, SIGNAL(sendFeatureVals(int,int,double,double,double)),
             this, SLOT(handleFeatureVals(int,int,double,double,double)));
 
+    if (isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
+
+        this->connect(this,SIGNAL(sendFeatureParams(int,int,double,double,double)),
+                      this->vp,SLOT(doFeatureExtract(int, int,double, double, double)));
+
+        t->start();
+    }
+
     fd->show();
 }
 
+
+
+void MainWindow::on_actionHistogram_triggered()
+{
+    // check
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+    HistogramDialog * hd = new HistogramDialog(this);
+    connect(hd,SIGNAL(sendHistogram(int, bool)),
+            this, SLOT(handleHistogram(int, bool)));
+
+    if (isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
+
+        this->connect(this,SIGNAL(sendHistogramParams(int, bool)),
+                      this->vp,SLOT(doHistogram(int,bool)));
+
+        t->start();
+    }
+
+    hd->show();
+}
+
+
+void MainWindow::on_actionContour_triggered()
+{
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    ContourDialog * cd = new ContourDialog;
+    connect(cd, SIGNAL(sendContourVals(int, bool, int)),
+            this, SLOT(handleContour(int, bool, int)));
+
+    if (isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
+
+        this->connect(this,SIGNAL(sendContourParams(int, bool, int)),
+                      this->vp,SLOT(drawContours(int, bool, int)));
+
+        t->start();
+    }
+
+    cd->show();
+}
 
 
 void MainWindow::on_actionMatches_triggered()
@@ -576,17 +739,6 @@ void MainWindow::on_actionMatches_triggered()
     md->show();
 }
 
-
-void MainWindow::on_actionHistogram_triggered()
-{
-    // check
-    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
-    HistogramDialog * hd = new HistogramDialog(this);
-    connect(hd,SIGNAL(sendHistogram(int, bool)),
-            this, SLOT(handleHistogram(int, bool)));
-
-    hd->show();
-}
 
 //! End ************************************************!//
 
@@ -665,6 +817,7 @@ void MainWindow::on_StartLiveCheckBox_clicked(bool checked)
     }
     else
     {
+        this->cap.release();
         this->isVideoLoaded = false;
         this->isVideoStopped = true;
         vp->isVideoStopped = true;
@@ -672,11 +825,6 @@ void MainWindow::on_StartLiveCheckBox_clicked(bool checked)
         ui->vOpLabel->clear();
     }
 }
-
-//void MainWindow::on_pushButton_clicked()
-//{
-//    this->close();
-//}
 
 
 void MainWindow::on_saveOutput_clicked()

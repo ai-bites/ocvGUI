@@ -200,7 +200,8 @@ void ImgProcess::doHoughLineTransform(
     else
         temp = this->grayImage.clone();
 
-    cvtColor(temp, this->opImage, CV_GRAY2BGR);
+    temp.copyTo(this->opImage);
+    //cvtColor(temp, this->opImage, CV_GRAY2RGB);
 
     if (lineMethodIdx == 1) // standard method
     {
@@ -242,10 +243,11 @@ void ImgProcess::doHoughCircleTransform(
         GaussianBlur(this->grayImage, temp, Size(9, 9), 2, 2);
     else
         temp = this->grayImage.clone();
+    temp.copyTo(this->opImage);
+
     HoughCircles(temp, circles, CV_HOUGH_GRADIENT, 1,
                  temp.rows/8, cannyThresh, detectThresh, minRad, maxRad);
 
-    this->opImage = this->image.clone();
     for( int i = 0; i < circles.size(); i++ )
     {
        Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
@@ -309,6 +311,54 @@ void ImgProcess::doHistogram(int numBins, bool showHistEqImg)
 }
 
 
+void ImgProcess::drawContours(int edgeThresh, bool doBlur, int methodIdx)
+{
+    Mat temp;
+    RNG rng(12345);
+
+    if (doBlur)
+        blur(this->grayImage, temp, Size(3,3));
+    else
+        temp = this->grayImage.clone();
+
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+
+    // Detect edges using canny and find the contours
+    Canny( temp, temp, edgeThresh, edgeThresh*2, 3 );
+
+    if (methodIdx == 0)
+    {
+        return;
+    }
+    if (methodIdx == 1)
+    {
+        cv::findContours( temp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+    }
+    if (methodIdx == 2)
+    {
+        cv::findContours( temp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+    }
+    if (methodIdx == 3)
+    {
+        cv::findContours( temp, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+    }
+    if (methodIdx == 4)
+    {
+        cv::findContours( temp, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+    }
+
+    // Draw contours
+    Mat drawing = Mat::zeros( this->grayImage.size(), CV_8UC3 );
+    cout << "doing drawing" << endl;
+    for( int i = 0; i< contours.size(); i++ )
+    {
+        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        cv::drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+    }
+    this->opImage = drawing.clone();
+
+}
 
 void ImgProcess::doHarrisCorner(int blockSize, int aperture,double kValue, int threshold)
 {
@@ -337,29 +387,29 @@ void ImgProcess::doHarrisCorner(int blockSize, int aperture,double kValue, int t
 void ImgProcess::doFeatureExtract(int fastThresh, int methodIdx,
                                   double siftThresh, double siftLineSensthresh, double surfThresh)
 {
-    this->opImage = image.clone();
+    this->opImage = grayImage.clone();
 
     if (methodIdx == 1) // FAST
     {
         cv::FastFeatureDetector fast(fastThresh);
-        fast.detect(this->image, keypoints);
+        fast.detect(this->grayImage, keypoints);
         // draw white coloured keypoints
-        cv::drawKeypoints(image,keypoints,this->opImage,
+        cv::drawKeypoints(grayImage,keypoints,this->opImage,
                           cv::Scalar(255,255,255), cv::DrawMatchesFlags::DRAW_OVER_OUTIMG);
     }
     if (methodIdx == 2) // SURF
     {
-        SurfFeatureDetector surf(surfThresh);
-        surf.detect(this->image, keypoints);
-        cv::drawKeypoints(image,keypoints,this->opImage,
-                          cv::Scalar(255,255,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+        cv::SurfFeatureDetector surf(surfThresh);
+        surf.detect(this->grayImage, keypoints);
+        cv::drawKeypoints(grayImage,keypoints,this->opImage,
+                          cv::Scalar(255,255,255), cv::DrawMatchesFlags::DRAW_OVER_OUTIMG);
     }
     if (methodIdx == 3) // SIFT
     {
         cv::SiftFeatureDetector sift(siftThresh, siftLineSensthresh);
-        sift.detect(this->image, keypoints);
-        cv::drawKeypoints(image,keypoints,this->opImage,
-                          cv::Scalar(255,255,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+        sift.detect(this->grayImage, keypoints);
+        cv::drawKeypoints(grayImage, keypoints,this->opImage,
+                          cv::Scalar(255,255,255), cv::DrawMatchesFlags::DRAW_OVER_OUTIMG);
     }
 
 }

@@ -37,7 +37,7 @@
 #include "Dialogs/featuresdialog.h"
 #include "Dialogs/histogramdialog.h"
 #include "Dialogs/matchesdialog.h"
-
+#include "Dialogs/contourdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -67,7 +67,15 @@ signals:
           int kernelH, double sigmaX, double sigmaY,int medianKernel);
     void sendSobelParams(int,bool,int,int,int,double,int,int);
     void sendCannyParams(int,int,bool,bool);
-
+    void sendHoughLinesParams(int lineMethodIdx, int lineThreshold,
+                              int lineRhoRes, int lineThetaRes, bool lineEdgeDetect);
+    void sendHoughCirclesParams(double, double,int, int, bool);
+    void sendHarrisParams(int blockSize, int aperture, double kValue, int threshold);
+    void sendFeatureParams(int threshold, int methodIdx,
+                           double siftThresh, double siftLineSensThresh,
+                           double surfThresh);
+    void sendHistogramParams(int, bool);
+    void sendContourParams(int, bool, int);
 
 
 private slots:
@@ -93,6 +101,8 @@ private slots:
     void handleFeatureVals(int, int, double, double, double);
     void handleHistogram(int, bool showHistEqImg);
     void handleMatchImages(cv::Mat firstImg, cv::Mat secondImg, bool isShow, string toDisplay);
+    void handleContour(int edgeThresh, bool doBlur, int methodIdx);
+
 
     void handleImageOpen();
     void handleVideoOpen(VideoCapture capture);
@@ -128,6 +138,8 @@ private slots:
     void on_actionMatches_triggered();
 
     void on_closeButton_clicked();
+
+    void on_actionContour_triggered();
 
 private:
     Ui::MainWindow *ui;

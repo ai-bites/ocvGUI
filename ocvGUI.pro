@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     Dialogs/featuresdialog.cpp \
     camera.cpp \
     Dialogs/histogramdialog.cpp \
-    Dialogs/matchesdialog.cpp
+    Dialogs/matchesdialog.cpp \
+    Dialogs/contourdialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
@@ -44,7 +45,8 @@ HEADERS  += mainwindow.h \
     Dialogs/featuresdialog.h \
     camera.h \
     Dialogs/histogramdialog.h \
-    Dialogs/matchesdialog.h
+    Dialogs/matchesdialog.h \
+    Dialogs/contourdialog.h
 
 INCLUDEPATH += /usr/local/include
 
@@ -68,7 +70,8 @@ FORMS    += mainwindow.ui \
     Dialogs/harrisdialog.ui \
     Dialogs/featuresdialog.ui \
     Dialogs/histogramdialog.ui \
-    Dialogs/matchesdialog.ui
+    Dialogs/matchesdialog.ui \
+    Dialogs/contourdialog.ui
 
 RESOURCES += \
     images.qrc

@@ -423,8 +423,9 @@
     <property name="title">
      <string>Extract</string>
     </property>
-    <addaction name="actionCorners"/>
+    <addaction name="actionContour"/>
     <addaction name="actionFAST"/>
+    <addaction name="actionCorners"/>
     <addaction name="actionMatches"/>
     <addaction name="actionSIFT"/>
    </widget>
@@ -573,6 +574,11 @@
   <action name="actionHistogram">
    <property name="text">
     <string>Histogram</string>
+   </property>
+  </action>
+  <action name="actionContour">
+   <property name="text">
+    <string>Contour</string>
    </property>
   </action>
  </widget>

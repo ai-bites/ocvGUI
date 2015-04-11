@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <stdlib.h>
 
 using namespace cv;
 
@@ -82,6 +83,8 @@ public:
     void computeHomography();
     // does Flann matching and returns the matches
     std::vector< DMatch > doFlannMatching(Mat descOne, Mat descTwo);
+    // Draw contour of connected objects
+    void drawContours(int, bool, int methodIdx);
 
 private:
     std::vector<cv::KeyPoint> keypoints;

@@ -51,6 +51,15 @@ public slots:
     void doBlur(int idx, int kernelL, int kernelH,double sigmaX, double sigmaY, int medianKernel);
     void doSobelAndLapOper(int,bool,int,int,int,double,int,int);
     void doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad);
+    void doHoughLineTransform(int lineMethodIdx, int lineThreshold,
+                              int lineRhoRes, int lineThetaRes, bool lineEdgeDetect);
+    void doHoughCircleTransform(double cannyThresh, double detectThresh,
+                              int minRad, int maxRad, bool applyBlur);
+    void doHarrisCorner(int blockSize, int aperture,double kValue, int threshold);
+    void doFeatureExtract(int fastThresh, int methodIdx,
+                              double siftThresh, double siftLineSensthresh, double surfThresh);
+    void doHistogram(int numBins, bool showHistEqImg);
+    void drawContours(int edgeThresh, bool doBlur, int methodIdx);
 
 };
 

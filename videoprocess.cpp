@@ -144,6 +144,148 @@ void VideoProcess::doCannyOper(int kernel, int threshold, bool applyBlur, bool i
     capture.release();
 }
 
+
+void VideoProcess::doHoughLineTransform(
+        int lineMethodIdx, int lineThreshold, int lineRhoRes, int lineThetaRes, bool lineEdgeDetect)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame.clone();
+        this->ip->image = frame.clone();
+        ip->doHoughLineTransform(lineMethodIdx, lineThreshold, lineRhoRes, lineThetaRes, lineEdgeDetect);
+
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
+
+void VideoProcess::doHoughCircleTransform(
+        double cannyThresh, double detectThresh, int minRad, int maxRad, bool applyBlur)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame.clone();
+        this->ip->image = frame.clone();
+        ip->doHoughCircleTransform(cannyThresh, detectThresh, minRad, maxRad, applyBlur);
+
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
+
+void VideoProcess::doHarrisCorner(int blockSize, int aperture,double kValue, int threshold)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame.clone();
+        this->ip->image = frame.clone();
+        ip->doHarrisCorner( blockSize,  aperture, kValue, threshold);
+
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
+
+void VideoProcess::doFeatureExtract(int fastThresh, int methodIdx,
+                                    double siftThresh, double siftLineSensthresh, double surfThresh)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame.clone();
+        this->ip->image = frame.clone();
+        ip->doFeatureExtract(fastThresh, methodIdx, siftThresh, siftLineSensthresh, surfThresh);
+
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
+
+void VideoProcess::doHistogram(int numBins, bool showHistEqImg)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame.clone();
+        this->ip->image = frame.clone();
+        ip->doHistogram(numBins, showHistEqImg);
+
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
+
+void VideoProcess::drawContours(int edgeThresh, bool doBlur, int methodIdx)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame.clone();
+        this->ip->image = frame.clone();
+        ip->drawContours(edgeThresh, doBlur, methodIdx);
+
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+
+}
+
 void VideoProcess::displayOpVideo()
 {
     QImage img;
