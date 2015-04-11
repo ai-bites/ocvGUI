@@ -349,7 +349,7 @@ void ImgProcess::drawContours(int edgeThresh, bool doBlur, int methodIdx)
     }
 
     // Draw contours
-    Mat drawing = Mat::zeros( this->grayImage.size(), CV_8UC3 );
+    Mat drawing = Mat::zeros( this->grayImage.size(), CV_8UC1 );
     cout << "doing drawing" << endl;
     for( int i = 0; i< contours.size(); i++ )
     {

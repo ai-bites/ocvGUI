@@ -415,7 +415,6 @@ void MainWindow::updateVideoIpImage(QImage img)
     ui->vIpLabel->setScaledContents(true);
     ui->vIpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
     qApp->processEvents();
-
 }
 
 
@@ -424,24 +423,7 @@ void MainWindow::updateVideoOpImage(QImage img)
     ui->vOpLabel->setPixmap(QPixmap::fromImage(img));
     ui->vOpLabel->setScaledContents(true);
     ui->vOpLabel->resize(ui->vIpFrame->width(), ui->vIpFrame->height());
-
-//    cv::Mat temp;
-//    if (ip->opImage.channels() == 1)
-//    {
-//        cvtColor(ip->opImage,temp, CV_GRAY2RGB);
-//    }
-//    else
-//    {
-//        cout << "setting temp" << endl;
-//        temp = ip->opImage.clone();
-//    }
-
-//    QImage img = QImage((const unsigned char*)(temp.data),
-//                            temp.cols,temp.rows,QImage::Format_RGB888);
-
-//    ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
-//    ui->OutputLabel->setScaledContents(true);
-
+    qApp->processEvents();
 }
 
 

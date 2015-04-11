@@ -37,6 +37,7 @@ public:
 
 signals:
     void sendVidoeOpImg(QImage);
+    void sendVideoOpImg();
 
 public slots:
     void displayOpVideo();
