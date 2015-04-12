@@ -23,6 +23,8 @@ void ContourDialog::on_drawPushButton_clicked()
     int edgeThresh = ui->edgeThreshspinBox->value();
     bool doBlur = ui->isEdgeDetectcheckBox->isChecked();
     int methodIdx = ui->contourTypeCombBox->currentIndex();
+    bool showRect = ui->boundingRectCheckBox->isChecked();
+    bool showCirc = ui->boundingCircleCheckBox->isChecked();
 
-    emit sendContourVals(edgeThresh, doBlur, methodIdx);
+    emit sendContourVals(edgeThresh, doBlur, methodIdx, showRect, showCirc);
 }

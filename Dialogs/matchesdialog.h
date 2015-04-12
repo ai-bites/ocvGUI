@@ -28,7 +28,7 @@ public:
     cv::Mat secondImg;
 
 signals:
-    void sendMatchImages(cv::Mat, cv::Mat, bool, string);
+    void sendMatchImages(cv::Mat, cv::Mat, bool, string, bool);
 
 private slots:
     void on_loadSecondImage_clicked();
@@ -36,6 +36,8 @@ private slots:
     void on_showMatches_clicked();
 
     void on_loadFirstImage_clicked();
+
+    void on_StitchPushButton_clicked();
 
 private:
     Ui::MatchesDialog *ui;

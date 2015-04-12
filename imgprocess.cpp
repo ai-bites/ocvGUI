@@ -311,7 +311,8 @@ void ImgProcess::doHistogram(int numBins, bool showHistEqImg)
 }
 
 
-void ImgProcess::drawContours(int edgeThresh, bool doBlur, int methodIdx)
+void ImgProcess::drawContours(int edgeThresh, bool doBlur,
+                              int methodIdx, bool showRect, bool showCircle)
 {
     Mat temp;
     RNG rng(12345);
@@ -333,28 +334,56 @@ void ImgProcess::drawContours(int edgeThresh, bool doBlur, int methodIdx)
     }
     if (methodIdx == 1)
     {
-        cv::findContours( temp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+        cv::findContours( temp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, Point(0, 0));
     }
     if (methodIdx == 2)
     {
-        cv::findContours( temp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+        cv::findContours( temp, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_NONE, Point(0, 0));
     }
     if (methodIdx == 3)
     {
-        cv::findContours( temp, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+        cv::findContours( temp, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE, Point(0, 0));
     }
     if (methodIdx == 4)
     {
-        cv::findContours( temp, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+        cv::findContours( temp, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0));
+    }
+
+    // Bounding boxes: Approximate contours to polygons + get bounding rects and circles
+    vector<vector <Point> > contoursPoly( contours.size() );
+    vector<Rect> boundRects( contours.size() );
+    vector<Point2f> center( contours.size() );
+    vector<float> radius( contours.size() );
+    for( int i = 0; i < contours.size(); i++ )
+    {
+        approxPolyDP( Mat(contours[i]), contoursPoly[i], 3, true );
+        boundRects[i] = boundingRect( Mat(contoursPoly[i]) );
+        minEnclosingCircle( (Mat)contoursPoly[i], center[i], radius[i] );
     }
 
     // Draw contours
     Mat drawing = Mat::zeros( this->grayImage.size(), CV_8UC1 );
-    cout << "doing drawing" << endl;
     for( int i = 0; i< contours.size(); i++ )
     {
         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-        cv::drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+
+        if (showRect == 0 && showCircle == 0)
+            cv::drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+
+        // now draw bounding boxes or shapes if needed
+        if (showRect)
+        {
+            cv::drawContours( drawing, contoursPoly, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+            boundRects[i] = boundingRect( Mat(contoursPoly[i]) );
+            rectangle( drawing, boundRects[i].tl(), boundRects[i].br(), color, 2, 8, 0 );
+
+        }
+        if (showCircle)
+        {
+            cv::drawContours( drawing, contoursPoly, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+            minEnclosingCircle( (Mat)contoursPoly[i], center[i], radius[i] );
+            circle( drawing, center[i], (int)radius[i], color, 2, 8, 0 );
+        }
     }
     this->opImage = drawing.clone();
 
@@ -362,11 +391,13 @@ void ImgProcess::drawContours(int edgeThresh, bool doBlur, int methodIdx)
 
 void ImgProcess::doHarrisCorner(int blockSize, int aperture,double kValue, int threshold)
 {
+    cout << "doing harris corner" << endl;
+
     Mat temp, tempNorm, tempNormScaled;
     cornerHarris(this->grayImage,temp, blockSize, aperture, kValue);
     //cout << "sample corner op: " << temp.at<int>(10,10) << endl;
 
-    normalize(temp, tempNorm, 0, 255, NORM_MINMAX, CV_32FC1);
+    normalize(temp, tempNorm, 0, 255, NORM_MINMAX, CV_8U);
     //cout << "normalized sample: " << tempNorm.at<int>(10,10) << endl;
     convertScaleAbs(tempNorm, tempNormScaled);
     //cout << "converted scaled: " << tempNormScaled.at<int>(10,10) << endl;
@@ -415,27 +446,28 @@ void ImgProcess::doFeatureExtract(int fastThresh, int methodIdx,
 }
 
 
-void ImgProcess::computeFundMatrix(int methodIdx)
+Mat ImgProcess::computeFundMatrix(int methodIdx)
 {
-    Mat imgOne, imgTwo;
-    std::vector<cv::KeyPoint> imgOneKeyPts, imgTwoKeyPts;
-    std::vector<cv::Point2f> imgOneKpFlt, imgTwoKpFlt;
     cv::Mat fundMatrix;
+    cv::Mat image;
 
-    this->image = cv::imread("/Users/shreya/Documents/workspace/cpp/ocvGUI/images/fm_1.png");
-    this->doFeatureExtract(0, 2, 0.0, 0.0, 200.);
+    cvtColor(this->firstImg,image, CV_RGB2GRAY);
+    cv::FastFeatureDetector fastOne(0);
+    fastOne.detect(image, keypoints);
+    // draw white coloured keypoints
+    //cv::drawKeypoints(image,keypoints,this->opImage,cv::Scalar(255,255,255), cv::DrawMatchesFlags::DRAW_OVER_OUTIMG);
+    //this->doFeatureExtract(0, 1, 0.0, 0.0, 200.);
     imgOneKeyPts = getKeyPoints();
-    imgOne = this->image.clone();
 
-    this->image = cv::imread("/Users/shreya/Documents/workspace/cpp/ocvGUI/images/fm_2.png");
-    this->doFeatureExtract(0, 2, 0.0, 0.0, 200.);
+    cvtColor(this->firstImg,image, CV_RGB2GRAY);
+    cv::FastFeatureDetector fastTwo(0);
+    fastTwo.detect(image, keypoints);
     imgTwoKeyPts = this->getKeyPoints();
-    imgTwo = this->image.clone();
 
     cout << "before conversion" << endl;
     // convert keypoints for computation
-    cv::KeyPoint::convert(imgOneKpFlt, imgOneKeyPts);
-    cv::KeyPoint::convert(imgTwoKpFlt, imgOneKeyPts);
+    cv::KeyPoint::convert( imgOneKeyPts, imgOneKpFlt);
+    cv::KeyPoint::convert(imgTwoKeyPts, imgTwoKpFlt);
 
     cout << "after conv" << endl;
 
@@ -445,45 +477,230 @@ void ImgProcess::computeFundMatrix(int methodIdx)
     }
     if (methodIdx == 2) // 8 point
     {
-        fundMatrix = cv::findFundamentalMat(imgOneKpFlt, imgTwoKpFlt, CV_FM_8POINT);
+        fundMatrix = cv::findFundamentalMat(Mat(imgOneKpFlt), Mat(imgTwoKpFlt), CV_FM_8POINT);
     }
     if (methodIdx == 3) // RANSAC
     {
-        fundMatrix = cv::findFundamentalMat(imgOneKpFlt, imgTwoKpFlt,  FM_RANSAC);
+        cout << "in ransac method " << endl;
+        fundMatrix = cv::findFundamentalMat(Mat(imgOneKpFlt), Mat(imgTwoKpFlt),  FM_RANSAC);
     }
-    //this->drawEpipolarLines(fundMatrix, cv::Mat(imgOneKpFlt), imgTwo);
+    return fundMatrix;
+    //this->drawEpipolarLines(fundMatrix, cv::Mat(imgOneKpFlt), this->sec);
 }
 
 
 void ImgProcess::doMatchImages(Mat firstImg, Mat secondImg, bool isShow)
 {
-    //-- Step 1: Detect the keypoints using SURF Detector
+    // we are not going to show matches.
+    // we are just loading images
+    if (isShow == false) return;
+
+    // detect the keypoints using SURF Detector
     int minHessian = 400;
     SurfFeatureDetector detector( minHessian );
-    std::vector<KeyPoint> keyPtsOne, keyPtsTwo;
+    imgOneKeyPts, imgTwoKeyPts;
 
-    detector.detect( firstImg, keyPtsOne );
-    detector.detect( secondImg, keyPtsTwo );
+    detector.detect( firstImg, imgOneKeyPts );
+    detector.detect( secondImg, imgTwoKeyPts );
 
-    //-- Step 2: Calculate descriptors (feature vectors)
+    // calculate descriptors
     SurfDescriptorExtractor extractor;
 
     Mat descOne, descTwo;
 
-    extractor.compute( firstImg, keyPtsOne, descOne );
-    extractor.compute( secondImg, keyPtsTwo, descTwo );
+    extractor.compute( firstImg, imgOneKeyPts, descOne );
+    extractor.compute( secondImg, imgTwoKeyPts, descTwo );
 
     std::vector< DMatch > goodMatches = doFlannMatching(descOne, descTwo);
 
-    Mat finalMatches;
-    drawMatches(firstImg, keyPtsOne, secondImg, keyPtsTwo,
+    Mat finalMatches, resMatches;
+    drawMatches(firstImg, imgOneKeyPts, secondImg, imgTwoKeyPts,
                  goodMatches, finalMatches, Scalar::all(-1), Scalar::all(-1),
                  vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
 
     Size sz = firstImg.size();
-    resize(finalMatches, finalMatches, sz);
-    imshow( "Good Matches", finalMatches );
+    resize(finalMatches, resMatches, Size(600,400));
+    imshow( "Good Matches", resMatches );
+
+    cv::waitKey(0);
+    cvDestroyWindow("Good Matches");
 }
+
+
+void ImgProcess::doStitchImages(Mat firstImg, Mat secondImg, bool isShow)
+{
+    if (isShow == false) return;
+
+    vector< Mat > vImg;
+    Mat rImg;
+
+    vImg.push_back(this->firstImg);
+    vImg.push_back(this->secondImg);
+
+    Stitcher stitcher = Stitcher::createDefault();
+    Stitcher::Status status = stitcher.stitch(vImg, rImg);
+
+    imshow("Stitched Image", rImg);
+    waitKey(0);
+    destroyWindow("Stitched Image");
+
+    /*
+    double confLevel = 1.5;
+    double minDist = 5.5;
+    double epiRatio = 1.5;
+    int minHess = 100;
+    // Prepare the matcher
+    RobustMatcher rmatcher;
+    rmatcher.setConfidenceLevel(confLevel);
+    rmatcher.setMinDistanceToEpipolar(minDist);
+    rmatcher.setRatio(epiRatio);
+    cv::Ptr<cv::FeatureDetector> pfd = new cv::SurfFeatureDetector(minHess);
+    rmatcher.setFeatureDetector(pfd);
+
+    // Match the two images
+    cv::Mat fundMatrix = rmatcher.match(this->firstImg, this->secondImg,
+                                         this->goodMatches, this->imgOneKeyPts, this->imgTwoKeyPts, 2);
+
+    // convert keypoints into points 2f
+   for (std::vector<cv::DMatch>::const_iterator
+      it = goodMatches.begin(); it!= goodMatches.end(); ++it)
+   {
+          // Get the position of left keypoints
+          float x = imgOneKeyPts[it->queryIdx].pt.x;
+          float y = imgOneKeyPts[it->queryIdx].pt.y;
+          imgOneKpFlt.push_back(cv::Point2f(x,y));
+          cv::circle(this->secondImg,cv::Point(x,y),3,cv::Scalar(255,255,255),3);
+
+          // Get the position of right keypoints
+          x = imgTwoKeyPts[it->trainIdx].pt.x;
+          y = imgTwoKeyPts[it->trainIdx].pt.y;
+          cv::circle(this->firstImg,cv::Point(x,y),3,cv::Scalar(255,255,255),3);
+          imgTwoKpFlt.push_back(cv::Point2f(x,y));
+   }
+
+
+    std::vector<uchar> inliers(imgOneKpFlt.size(),0);
+    cv::Mat homography = cv::findHomography(
+            imgOneKpFlt,
+            imgTwoKpFlt, // corresponding points
+            inliers,	// outputed inliers matches
+            CV_RANSAC,	// RANSAC method
+            1.);	    // max distance to reprojection point
+
+    cout << "computed homography !" << endl;
+
+    // Draw the inlier points
+    std::vector< cv::Point2f >::const_iterator itPts = imgOneKpFlt.begin();
+    std::vector< uchar >::const_iterator itIn = inliers.begin();
+    while (itPts != imgOneKpFlt.end())
+    {
+        // draw a circle at each inlier location
+        if (*itIn)
+            cv::circle(this->secondImg,*itPts,3,cv::Scalar(255,255,255),2);
+
+        ++itPts;
+        ++itIn;
+    }
+
+    itPts = imgTwoKpFlt.begin();
+    itIn= inliers.begin();
+    while (itPts!=imgTwoKpFlt.end())
+    {
+        // draw a circle at each inlier location
+        if (*itIn) cv::circle(this->firstImg,*itPts,3,cv::Scalar(255,255,255),2);
+
+        ++itPts;
+        ++itIn;
+    }
+
+    cv::Mat result;
+    warpPerspective(this->firstImg,result,homography,
+                    cv::Size(this->firstImg.cols+this->secondImg.cols,this->firstImg.rows));
+    cv::Mat half(result,cv::Rect(0,0,this->secondImg.cols,this->secondImg.rows));
+
+    waitKey(0);
+    destroyWindow("Result");
+    */
+
+}
+
+void ImgProcess::doEpipolarLines( bool isShow, string toDisplay, int fMatMethodIdx,
+                                  bool showInFirst,bool showInSec,double confLevel,
+                                  double epiRatio,double minDist,int minHess)
+{
+    // no point showing lines when we don't have to
+    if (isShow == false) return;
+    if (showInFirst == false && showInSec == false) return;
+
+    // clear the lines and points
+    this->imgOneKeyPts.clear();
+    this->imgTwoKeyPts.clear();
+    this->goodMatches.clear();
+    this->imgOneKpFlt.clear();
+    this->imgTwoKpFlt.clear();
+    cv::Mat secImgToDraw = this->secondImg.clone();
+    cv::Mat firstImgToDraw = this->firstImg.clone();
+
+     // Prepare the matcher
+     RobustMatcher rmatcher;
+     rmatcher.setConfidenceLevel(confLevel);
+     rmatcher.setMinDistanceToEpipolar(minDist);
+     rmatcher.setRatio(epiRatio);
+     cv::Ptr<cv::FeatureDetector> pfd = new cv::SurfFeatureDetector(minHess);
+     rmatcher.setFeatureDetector(pfd);
+
+     // Match the two images
+     // std::vector<cv::DMatch> matches;
+
+     cv::Mat fundMatrix = rmatcher.match(firstImgToDraw, secImgToDraw,
+                                          this->goodMatches, this->imgOneKeyPts, this->imgTwoKeyPts, fMatMethodIdx);
+
+     // convert keypoints into points 2f
+    for (std::vector<cv::DMatch>::const_iterator
+       it = goodMatches.begin(); it!= goodMatches.end(); ++it)
+    {
+           // Get the position of left keypoints
+           float x = imgOneKeyPts[it->queryIdx].pt.x;
+           float y = imgOneKeyPts[it->queryIdx].pt.y;
+           imgOneKpFlt.push_back(cv::Point2f(x,y));
+           cv::circle(secImgToDraw,cv::Point(x,y),3,cv::Scalar(255,255,255),3);
+
+           // Get the position of right keypoints
+           x = imgTwoKeyPts[it->trainIdx].pt.x;
+           y = imgTwoKeyPts[it->trainIdx].pt.y;
+           cv::circle(firstImgToDraw,cv::Point(x,y),3,cv::Scalar(255,255,255),3);
+           imgTwoKpFlt.push_back(cv::Point2f(x,y));
+    }
+
+    // draw lines
+    std::vector<cv::Vec3f> linesOnSecondImg, linesOnFirstImg;
+    cv::computeCorrespondEpilines(Mat(imgOneKpFlt), 1,fundMatrix,linesOnSecondImg);
+    cv::computeCorrespondEpilines(Mat(imgTwoKpFlt), 2,fundMatrix,linesOnFirstImg );
+
+    if (showInSec)
+    {
+        for (vector<cv::Vec3f>::const_iterator it = linesOnSecondImg.begin();
+             it != linesOnSecondImg.end(); ++it)
+        {
+            cv::line(secImgToDraw, cv::Point(0,-(*it)[2]/(*it)[1]),
+                    cv::Point(secImgToDraw.cols,-((*it)[2]+(*it)[0]*secImgToDraw.cols)/(*it)[1]),
+                    cv::Scalar(255,255,255));
+        }
+        this->opImage = secImgToDraw.clone();
+    }
+    if (showInFirst)
+    {
+        for (vector<cv::Vec3f>::const_iterator it = linesOnFirstImg.begin();
+             it != linesOnFirstImg.end(); ++it)
+        {
+            cv::line(firstImgToDraw, cv::Point(0,-(*it)[2]/(*it)[1]),
+                    cv::Point(firstImgToDraw.cols,-((*it)[2]+(*it)[0]*firstImgToDraw.cols)/(*it)[1]),
+                    cv::Scalar(255,255,255));
+        }
+        this->image = firstImgToDraw.clone();
+    }
+}
+
 
 std::vector< DMatch > ImgProcess::doFlannMatching(Mat descOne, Mat descTwo)
 {
@@ -518,66 +735,60 @@ void ImgProcess::computeHomography()
 {
     cout << "computing homography" << endl;
     Mat imgOne, imgTwo;
-    std::vector<cv::KeyPoint> imgOneKeyPts, imgTwoKeyPts;
-    std::vector<cv::Point2f> imgOneKpFlt, imgTwoKpFlt;
+    //std::vector<cv::Point2f> imgOneKpFlt, imgTwoKpFlt;
     cv::Mat fundMatrix;
 
-    std::vector<KeyPoint> keyPtsOne, keyPtsTwo;
+    //std::vector<KeyPoint> keyPtsOne, keyPtsTwo;
     std::vector<cv::DMatch> matches;
 
-    this->image = cv::imread("/Users/shreya/Desktop/test_images/table_1.jpg");
-    this->doFeatureExtract(0, 2, 0.0, 0.0, 200.);
+    cout << "doing feature extraction" << endl;
+    this->image = cv::imread("/Users/shreya/Desktop/test_images/tools_1.bmp");
+    this->doFeatureExtract(0, 2, 2.0, 1.0, 200.);
     imgOneKeyPts = getKeyPoints();
     imgOne = this->image.clone();
 
-    this->opImage = cv::imread("/Users/shreya/Desktop/test_images/table_2.jpg");
-    this->doFeatureExtract(0, 2, 0.0, 0.0, 200.);
+    this->opImage = cv::imread("/Users/shreya/Desktop/test_images/tools_2.bmp");
+    this->doFeatureExtract(0, 2, 2.0, 1.0, 200.);
     imgTwoKeyPts = this->getKeyPoints();
     imgTwo = this->opImage.clone();
-
-
 
     cout << "got images" << endl;
     int minHessian = 400;
     SurfFeatureDetector detector( minHessian );
 
-    detector.detect( this->image, keyPtsOne );
-    detector.detect( this->opImage, keyPtsTwo );
+    detector.detect( this->image, imgOneKeyPts );
+    detector.detect( this->opImage, imgTwoKeyPts );
 
     // Calculate descriptors (feature vectors)
     SurfDescriptorExtractor extractor;
 
     Mat descOne, descTwo;
 
-    extractor.compute( this->image, keyPtsOne, descOne );
-    extractor.compute( this->opImage, keyPtsTwo, descTwo );
+    extractor.compute( this->image, imgOneKeyPts, descOne );
+    extractor.compute( this->opImage, imgTwoKeyPts, descTwo );
 
     cout << "got desc" << endl;
 
-    std::vector< DMatch > goodMatches = doFlannMatching(descOne, descTwo);
-    cout << "got matches" << goodMatches.size() << endl;
-    cout << "keypoints 1 count" << imgOneKeyPts.size() << endl;
-    cout << "kpts 2 count" << imgTwoKeyPts.size() << endl;
-
+    goodMatches = doFlannMatching(descOne, descTwo);
 
     // convert to points 2f vector to use for homography computation
-    std::vector< cv::Point2f > points1, points2;
+    //std::vector< cv::Point2f > points1, points2;
     cout << "after declaration" << endl;
     for( std::vector<cv::KeyPoint>::const_iterator it = imgOneKeyPts.begin(); it!= imgOneKeyPts.end();it++)
     {
-        points1.push_back(it->pt);
+        imgOneKpFlt.push_back(it->pt);
     }
     for( std::vector<cv::KeyPoint>::const_iterator it = imgTwoKeyPts.begin(); it!= imgTwoKeyPts.end();it++)
     {
-        points2.push_back(it->pt);
+        imgTwoKpFlt.push_back(it->pt);
     }
 
     cout << "created points 1 and points 2" << endl;
 
-    std::vector<uchar> inliers(points1.size(),0);
+    std::vector<uchar> inliers(imgOneKpFlt.size(),0);
     cv::Mat homography = cv::findHomography(
-            cv::Mat(points1),
-            cv::Mat(points2), // corresponding points
+            cv::Mat(imgOneKpFlt),
+            cv::Mat(imgTwoKpFlt), // corresponding points
             inliers,	// outputed inliers matches
             CV_RANSAC,	// RANSAC method
             1.);	    // max distance to reprojection point
@@ -585,9 +796,9 @@ void ImgProcess::computeHomography()
     cout << "computed homography !" << endl;
 
     // Draw the inlier points
-    std::vector<cv::Point2f>::const_iterator itPts = points1.begin();
-    std::vector<uchar>::const_iterator itIn= inliers.begin();
-    while (itPts != points1.end())
+    std::vector<cv::Point2f>::const_iterator itPts = imgOneKpFlt.begin();
+    std::vector<uchar>::const_iterator itIn = inliers.begin();
+    while (itPts != imgOneKpFlt.end())
     {
         // draw a circle at each inlier location
         if (*itIn)
@@ -597,9 +808,9 @@ void ImgProcess::computeHomography()
         ++itIn;
     }
 
-    itPts= points2.begin();
+    itPts = imgTwoKpFlt.begin();
     itIn= inliers.begin();
-    while (itPts!=points2.end())
+    while (itPts!=imgTwoKpFlt.end())
     {
         // draw a circle at each inlier location
         if (*itIn) cv::circle(this->image,*itPts,3,cv::Scalar(255,255,255),2);
@@ -608,40 +819,39 @@ void ImgProcess::computeHomography()
         ++itIn;
     }
 
-    // Display the images with points
-//    cv::namedWindow("Image 1 Homography Points", CV_WINDOW_NORMAL);
-//    cv::resize(this->opImage, this->opImage, Size(400,400));
-//    cv::imshow("Image 1 Homography Points",this->opImage);
-//    cv::namedWindow("Image 2 Homography Points", CV_WINDOW_NORMAL);
-//    cv::resize(this->image, this->image, Size(400,400));
-//    cv::imshow("Image 2 Homography Points",this->image);
-
     cv::Mat result;
     warpPerspective(this->image,result,homography,
                     cv::Size(this->image.cols+this->opImage.cols,this->image.rows));
     cv::Mat half(result,cv::Rect(0,0,this->opImage.cols,this->opImage.rows));
 
     this->opImage.copyTo(half);
-    cv::resize(result, result, Size(400,400));
+    cv::resize(result, result, Size(600,400));
     imshow( "Result", result );
 
     return;
 }
 
 
+//!
+//! \brief ImgProcess::drawEpipolarLines Given the fundamental matrix
+//!        and the keypoints in the one image, draws the image in the other image
+//! \param fundMatrix - computed fundamental matrix
+//! \param keyPoints  - Keypints in image 1
+//! \param image      - Image 2 on which to plot
+//!
 void ImgProcess::drawEpipolarLines(Mat fundMatrix, Mat keyPoints, Mat image)
 {
     // vector of lines
     std::vector<cv::Vec3f> lines;
     cv::computeCorrespondEpilines(keyPoints, 1,fundMatrix,lines);
 
-//    for (vector<cv::Vec3f>::const_iterator it= lines.begin();it!=lines.end(); ++it)
-//    {
-//        //
-//        cv::line(image, cv::Point(0,-(*it)[2]/(*it)[1]),
-//                cv::Point(image.cols,-((*it)[2]+(*it)[0]*image.cols)/(*it)[1]),
-//                cv::Scalar(255,255,255));
-//    }
+    for (vector<cv::Vec3f>::const_iterator it= lines.begin();it!=lines.end(); ++it)
+    {
+        //
+        cv::line(image, cv::Point(0,-(*it)[2]/(*it)[1]),
+                cv::Point(image.cols,-((*it)[2]+(*it)[0]*image.cols)/(*it)[1]),
+                cv::Scalar(255,255,255));
+    }
 
 }
 

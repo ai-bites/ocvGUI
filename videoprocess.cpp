@@ -263,7 +263,8 @@ void VideoProcess::doHistogram(int numBins, bool showHistEqImg)
 }
 
 
-void VideoProcess::drawContours(int edgeThresh, bool doBlur, int methodIdx)
+void VideoProcess::drawContours(int edgeThresh, bool doBlur,
+                                int methodIdx, bool showRect, bool showCircle)
 {
     QImage img;
 
@@ -273,7 +274,7 @@ void VideoProcess::drawContours(int edgeThresh, bool doBlur, int methodIdx)
         cvtColor(frame,destFrame,CV_BGR2GRAY);
         this->ip->grayImage = destFrame.clone();
         this->ip->image = frame.clone();
-        ip->drawContours(edgeThresh, doBlur, methodIdx);
+        ip->drawContours(edgeThresh, doBlur, methodIdx, showRect, showCircle);
 
         img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
                      ip->opImage.rows,QImage::Format_Indexed8);

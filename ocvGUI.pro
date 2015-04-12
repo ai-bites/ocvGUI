@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     camera.cpp \
     Dialogs/histogramdialog.cpp \
     Dialogs/matchesdialog.cpp \
-    Dialogs/contourdialog.cpp
+    Dialogs/contourdialog.cpp \
+    Dialogs/epipolardialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
@@ -46,7 +47,9 @@ HEADERS  += mainwindow.h \
     camera.h \
     Dialogs/histogramdialog.h \
     Dialogs/matchesdialog.h \
-    Dialogs/contourdialog.h
+    Dialogs/contourdialog.h \
+    Dialogs/epipolardialog.h \
+    robustmatcher.h
 
 INCLUDEPATH += /usr/local/include
 
@@ -57,7 +60,10 @@ LIBS += -L/usr/local/lib \
    -lopencv_features2d \
    -lopencv_calib3d \
    -lopencv_nonfree \
-   -lopencv_flann
+   -lopencv_flann \
+   -lopencv_legacy \
+   -lopencv_stitching
+
 
 FORMS    += mainwindow.ui \
     Dialogs/morphologydialog.ui \
@@ -71,7 +77,8 @@ FORMS    += mainwindow.ui \
     Dialogs/featuresdialog.ui \
     Dialogs/histogramdialog.ui \
     Dialogs/matchesdialog.ui \
-    Dialogs/contourdialog.ui
+    Dialogs/contourdialog.ui \
+    Dialogs/epipolardialog.ui
 
 RESOURCES += \
     images.qrc

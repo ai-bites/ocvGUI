@@ -16,7 +16,7 @@ public:
     ~ContourDialog();
 
 signals:
-    void sendContourVals(int, bool, int);
+    void sendContourVals(int, bool, int, bool, bool);
 
 private slots:
     void on_closePushButton_clicked();

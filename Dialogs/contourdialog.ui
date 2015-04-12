@@ -6,58 +6,23 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>292</width>
-    <height>213</height>
+    <width>284</width>
+    <height>263</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
      <x>30</x>
      <y>20</y>
      <width>231</width>
-     <height>161</height>
+     <height>211</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0" colspan="2">
-     <widget class="QCheckBox" name="isEdgeDetectcheckBox">
-      <property name="text">
-       <string>Edge Detect Before Drawing</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
-     <widget class="QPushButton" name="drawPushButton">
-      <property name="text">
-       <string>Draw</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Edge Threshold</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="1">
-     <widget class="QPushButton" name="closePushButton">
-      <property name="text">
-       <string>Close</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Contour Type</string>
-      </property>
-     </widget>
-    </item>
     <item row="3" column="1">
      <widget class="QSpinBox" name="edgeThreshspinBox">
       <property name="minimum">
@@ -95,6 +60,55 @@
         <string>Two Level Hierarchy</string>
        </property>
       </item>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="2">
+     <widget class="QCheckBox" name="isEdgeDetectcheckBox">
+      <property name="text">
+       <string>Edge Detect Before Drawing</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Edge Threshold</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Contour Type</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0">
+     <widget class="QPushButton" name="drawPushButton">
+      <property name="text">
+       <string>Draw</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="1">
+     <widget class="QPushButton" name="closePushButton">
+      <property name="text">
+       <string>Close</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0" colspan="2">
+     <widget class="QCheckBox" name="boundingRectCheckBox">
+      <property name="text">
+       <string>Bounding Rectangle</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="2">
+     <widget class="QCheckBox" name="boundingCircleCheckBox">
+      <property name="text">
+       <string>Bounding Circle</string>
+      </property>
      </widget>
     </item>
    </layout>

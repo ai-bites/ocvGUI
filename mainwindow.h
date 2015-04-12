@@ -38,6 +38,8 @@
 #include "Dialogs/histogramdialog.h"
 #include "Dialogs/matchesdialog.h"
 #include "Dialogs/contourdialog.h"
+#include "Dialogs/epipolardialog.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -75,7 +77,7 @@ signals:
                            double siftThresh, double siftLineSensThresh,
                            double surfThresh);
     void sendHistogramParams(int, bool);
-    void sendContourParams(int, bool, int);
+    void sendContourParams(int, bool, int, bool, bool);
 
 
 private slots:
@@ -100,16 +102,17 @@ private slots:
     void handleHarrisSignal(int blockSize, int aperture, double kValue, int threshold);
     void handleFeatureVals(int, int, double, double, double);
     void handleHistogram(int, bool showHistEqImg);
-    void handleMatchImages(cv::Mat firstImg, cv::Mat secondImg, bool isShow, string toDisplay);
-    void handleContour(int edgeThresh, bool doBlur, int methodIdx);
+    void handleMatchImages(cv::Mat firstImg, cv::Mat secondImg, bool isShow, string toDisplay, bool isStitch);
+    void handleEpipolarImages(Mat firstImg, Mat secondImg, bool isShow, string toDisplay, int fMatMethodIdx,
+                                          bool showInFirst, bool showInSec, double confLevel,
+                                          double epiRatio, double minDist, int minHess);
+    void handleContour(int edgeThresh, bool doBlur, int methodIdx, bool showRect, bool ShowCircle);
 
 
     void handleImageOpen();
     void handleVideoOpen(VideoCapture capture);
 
     void displayImage(Mat, Mat, string);
-
-    //void on_pushButton_clicked();
 
     void on_StartLiveCheckBox_clicked(bool checked);
 
@@ -141,9 +144,12 @@ private slots:
 
     void on_actionContour_triggered();
 
+    void on_actionEpipolar_triggered();
+
 private:
     Ui::MainWindow *ui;
     void displayOp();
+    void refreshIpImg();
     bool isVideoStopped;
 
 

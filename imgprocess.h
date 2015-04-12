@@ -19,17 +19,18 @@
 #include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/stitching/stitcher.hpp>
-#include <opencv2/stitching/warpers.hpp>
+//#include <opencv2/stitching/warpers.hpp>
 #include <opencv2/stitching/detail/matchers.hpp>
+#include <opencv2/legacy/legacy.hpp>
+#include <opencv2/opencv.hpp>
 
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include "robustmatcher.h"
 
 using namespace cv;
 
-//#include <stdlib.h>     /* srand, rand */
-//#include <time.h>       /* time */
 
 #include <qglobal.h>
 
@@ -42,6 +43,13 @@ public:
     cv::Mat grayImage;
     cv::Mat opImage;
     cv::Mat logo;
+
+    // for matching, correspondece, fund matrix computation, etc
+    cv::Mat firstImg;
+    cv::Mat secondImg;
+    std::vector<cv::KeyPoint> imgOneKeyPts, imgTwoKeyPts;
+    std::vector<cv::Point2f> imgOneKpFlt, imgTwoKpFlt;
+    std::vector< DMatch > goodMatches;
 
     // need these when we compute fundamental matrix
     std::vector<cv::KeyPoint> getKeyPoints() {return this->keypoints;}
@@ -74,17 +82,23 @@ public:
     void doFeatureExtract(int fastThresh, int methodIdx,
                           double surfThresh, double siftThresh, double lineSensThresh);
     // compute Fundamental matrix given two images
-    void computeFundMatrix(int methodIdx);
+    Mat computeFundMatrix(int methodIdx);
     // Given an input image and number of bins, compute histogram and display as output
     void doHistogram(int numBins, bool showHistEqImg);
     // Finds the match between two given images
     void doMatchImages(Mat, Mat, bool);
+    // Stitch images and display the stiched images as one
+    void doStitchImages(Mat firstImg, Mat secondImg, bool isShow);
+    // Draws the epipolar lines for given set of images
+    void doEpipolarLines(bool isShow, string toDisplay, int fMatMethodIdx,
+                         bool showInFirst, bool showInSec, double confLevel,
+                         double epiRatio, double minDist, int minHess);
     // compute homography between two given images
     void computeHomography();
     // does Flann matching and returns the matches
     std::vector< DMatch > doFlannMatching(Mat descOne, Mat descTwo);
     // Draw contour of connected objects
-    void drawContours(int, bool, int methodIdx);
+    void drawContours(int, bool, int methodIdx, bool showRect, bool showCircle);
 
 private:
     std::vector<cv::KeyPoint> keypoints;

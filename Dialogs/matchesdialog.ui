@@ -6,51 +6,52 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>245</width>
-    <height>170</height>
+    <width>249</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QPushButton" name="loadFirstImage">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
      <x>40</x>
      <y>30</y>
-     <width>151</width>
-     <height>32</height>
+     <width>166</width>
+     <height>134</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Load First Image</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="loadSecondImage">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>60</y>
-     <width>151</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Load Second Image</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="showMatches">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>100</y>
-     <width>151</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Show Matches</string>
-   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QPushButton" name="loadFirstImage">
+      <property name="text">
+       <string>Load First Image</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QPushButton" name="loadSecondImage">
+      <property name="text">
+       <string>Load Second Image</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="showMatches">
+      <property name="text">
+       <string>Show Matches</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QPushButton" name="StitchPushButton">
+      <property name="text">
+       <string>Stitch Images</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

@@ -60,7 +60,7 @@ public slots:
     void doFeatureExtract(int fastThresh, int methodIdx,
                               double siftThresh, double siftLineSensthresh, double surfThresh);
     void doHistogram(int numBins, bool showHistEqImg);
-    void drawContours(int edgeThresh, bool doBlur, int methodIdx);
+    void drawContours(int edgeThresh, bool doBlur, int methodIdx, bool showRect, bool showCircle);
 
 };
 

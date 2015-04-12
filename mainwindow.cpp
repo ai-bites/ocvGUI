@@ -39,7 +39,6 @@ void MainWindow::displayOp()
     }
     else
     {
-        cout << "setting temp" << endl;
         temp = ip->opImage.clone();
     }
 
@@ -50,9 +49,29 @@ void MainWindow::displayOp()
     ui->OutputLabel->setScaledContents(true);
 }
 
+
+void MainWindow::refreshIpImg()
+{
+    cv::Mat temp;
+    if (ip->opImage.channels() == 1)
+    {
+        cvtColor(ip->image,temp, CV_GRAY2RGB);
+    }
+    else
+    {
+        temp = ip->image.clone();
+    }
+
+    QImage img = QImage((const unsigned char*)(temp.data),
+                            temp.cols,temp.rows,QImage::Format_RGB888);
+
+    ui->InputLabel->setPixmap(QPixmap::fromImage(img));
+    ui->InputLabel->setScaledContents(true);
+}
+
 void MainWindow::displayImage(Mat inputImg, Mat outputImg, string whichImg)
 {
-    cout << "in display image" << endl;
+    cout << "in display image, which img is: " << whichImg << endl;
 
     if (whichImg.compare("input") == 0)
     {
@@ -63,7 +82,6 @@ void MainWindow::displayImage(Mat inputImg, Mat outputImg, string whichImg)
         }
         else
         {
-            cout << "setting temp" << endl;
             temp = inputImg.clone();
         }
 
@@ -72,6 +90,8 @@ void MainWindow::displayImage(Mat inputImg, Mat outputImg, string whichImg)
 
         ui->InputLabel->setPixmap(QPixmap::fromImage(img));
         ui->InputLabel->setScaledContents(true);
+        // finally set to img procssing class to be used there
+        ip->firstImg = inputImg;
     }
 
     if (whichImg.compare("output") == 0)
@@ -93,6 +113,7 @@ void MainWindow::displayImage(Mat inputImg, Mat outputImg, string whichImg)
 
         ui->OutputLabel->setPixmap(QPixmap::fromImage(img));
         ui->OutputLabel->setScaledContents(true);
+        ip->secondImg = outputImg;
     }
     return;
 }
@@ -289,17 +310,36 @@ void MainWindow::handleFeatureVals(int threshold, int methodIdx,
 }
 
 
-void MainWindow::handleMatchImages(cv::Mat firstImg, cv::Mat secondImg, bool isShow, string toDisplay)
+void MainWindow::handleMatchImages(cv::Mat firstImg, cv::Mat secondImg,
+                                   bool isShow, string toDisplay, bool isStitch)
 {
     if (isShow == true)
     {
-        cout << "in is show" << endl;
-        ip->doMatchImages(firstImg, secondImg, isShow);
+        if (isStitch == false)
+            ip->doMatchImages(firstImg, secondImg, isShow);
+        else
+            ip->doStitchImages(firstImg, secondImg, isShow);
         return;
     }
     displayImage(firstImg, secondImg, toDisplay);
 }
 
+
+void MainWindow::handleEpipolarImages(Mat firstImg, Mat secondImg, bool isShow, string toDisplay, int fMatMethodIdx,
+                                      bool showInFirst,bool showInSec,double confLevel,
+                                      double epiRatio,double minDist,int minHess)
+{
+    if (isShow == true)
+    {
+        ip->doEpipolarLines( isShow,  toDisplay,  fMatMethodIdx,
+                             showInFirst, showInSec, confLevel,
+                             epiRatio, minDist, minHess);
+        displayOp();
+        refreshIpImg();
+        return;
+    }
+    displayImage(firstImg, secondImg, toDisplay);
+}
 
 void MainWindow::handleHistogram(int numBins, bool showHistEqImg)
 {
@@ -317,17 +357,18 @@ void MainWindow::handleHistogram(int numBins, bool showHistEqImg)
 }
 
 
-void MainWindow::handleContour(int edgeThresh, bool doBlur, int methodIdx)
+void MainWindow::handleContour(int edgeThresh, bool doBlur,
+                               int methodIdx, bool showRect, bool ShowCircle)
 {
     if (isImgLoaded)
     {
         ui->OutputLabel->clear();
-        ip->drawContours(edgeThresh, doBlur, methodIdx);
+        ip->drawContours(edgeThresh, doBlur, methodIdx, showRect, ShowCircle);
         displayOp();
     }
     if (isVideoLoaded)
     {
-        emit sendContourParams(edgeThresh, doBlur, methodIdx);
+        emit sendContourParams(edgeThresh, doBlur, methodIdx, showRect, ShowCircle);
     }
 
 }
@@ -336,7 +377,7 @@ void MainWindow::handleImageOpen()
 {
     //QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
     //ip->image = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
-    ip->image = imread("/Users/shreya/Desktop/test_images/2_boat.png");
+    ip->image = imread("/Users/shreya/Desktop/test_images/marais.jpg");
 
     if(! ip->image.data)
     {
@@ -692,8 +733,8 @@ void MainWindow::on_actionContour_triggered()
     if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
 
     ContourDialog * cd = new ContourDialog;
-    connect(cd, SIGNAL(sendContourVals(int, bool, int)),
-            this, SLOT(handleContour(int, bool, int)));
+    connect(cd, SIGNAL(sendContourVals(int, bool, int, bool, bool)),
+            this, SLOT(handleContour(int, bool, int, bool, bool)));
 
     if (isVideoLoaded)
     {
@@ -701,8 +742,8 @@ void MainWindow::on_actionContour_triggered()
         currentThread->exit(0);
         this->currentThread = t;
 
-        this->connect(this,SIGNAL(sendContourParams(int, bool, int)),
-                      this->vp,SLOT(drawContours(int, bool, int)));
+        this->connect(this,SIGNAL(sendContourParams(int, bool, int, bool, bool)),
+                      this->vp,SLOT(drawContours(int, bool, int, bool, bool)));
 
         t->start();
     }
@@ -711,12 +752,24 @@ void MainWindow::on_actionContour_triggered()
 }
 
 
+void MainWindow::on_actionEpipolar_triggered()
+{
+    if (this->isVideoLoaded == true) return;
+    EpipolarDialog * ed = new EpipolarDialog;
+
+    connect(ed, SIGNAL(sendEpipolarImages(Mat, Mat,bool,string,int,bool,bool,double,double,double,int)),
+            this, SLOT(handleEpipolarImages(Mat, Mat, bool,string,int,bool,bool,double,double,double,int)));
+
+    ed->show();
+}
+
+
 void MainWindow::on_actionMatches_triggered()
 {
     if (this->isVideoLoaded == true) return;
     MatchesDialog * md = new MatchesDialog(this);
-    connect(md, SIGNAL(sendMatchImages(cv::Mat, cv::Mat, bool, string)),
-            this, SLOT(handleMatchImages(cv::Mat, cv::Mat, bool, string)));
+    connect(md, SIGNAL(sendMatchImages(cv::Mat, cv::Mat, bool, string, bool)),
+            this, SLOT(handleMatchImages(cv::Mat, cv::Mat, bool, string, bool)));
 
     md->show();
 }

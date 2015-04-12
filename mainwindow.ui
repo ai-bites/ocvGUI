@@ -427,7 +427,7 @@
     <addaction name="actionFAST"/>
     <addaction name="actionCorners"/>
     <addaction name="actionMatches"/>
-    <addaction name="actionSIFT"/>
+    <addaction name="actionEpipolar"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuOperations"/>
@@ -551,9 +551,9 @@
     <string>Matches</string>
    </property>
   </action>
-  <action name="actionSIFT">
+  <action name="actionEpipolar">
    <property name="text">
-    <string>SIFT</string>
+    <string>Epipolar Lines</string>
    </property>
   </action>
   <action name="actionSobel">

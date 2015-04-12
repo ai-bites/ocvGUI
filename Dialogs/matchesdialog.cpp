@@ -21,7 +21,7 @@ void MatchesDialog::on_loadSecondImage_clicked()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
     this->secondImg = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
     string s = "output";
-    emit sendMatchImages(this->firstImg, this->secondImg, false, s);
+    emit sendMatchImages(this->firstImg, this->secondImg, false, s, false);
 }
 
 void MatchesDialog::on_showMatches_clicked()
@@ -29,12 +29,12 @@ void MatchesDialog::on_showMatches_clicked()
     if (!(this->firstImg.data) || !(this->secondImg.data))
     {
         QMessageBox messageBox;
-        messageBox.critical(0,"Warning","Please load both images first !");
+        messageBox.warning(0,"Warning","Please load both images first !");
         messageBox.setFixedSize(500,200);
         return;
     }
 
-    emit sendMatchImages(this->firstImg, this->secondImg, true, "");
+    emit sendMatchImages(this->firstImg, this->secondImg, true, "", false);
 }
 
 void MatchesDialog::on_loadFirstImage_clicked()
@@ -42,6 +42,19 @@ void MatchesDialog::on_loadFirstImage_clicked()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
     this->firstImg = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
     string s = "input";
-    std::cout << "going to emit" << std::endl;
-    emit sendMatchImages(this->firstImg, this->secondImg, false, s);
+
+    emit sendMatchImages(this->firstImg, this->secondImg, false, s, false);
+}
+
+void MatchesDialog::on_StitchPushButton_clicked()
+{
+    if (!(this->firstImg.data) || !(this->secondImg.data))
+    {
+        QMessageBox messageBox;
+        messageBox.warning(0,"Warning","Please load both images first !");
+        messageBox.setFixedSize(500,200);
+
+        return;
+    }
+    emit sendMatchImages(this->firstImg, this->secondImg, true, "", true);
 }
