@@ -48,6 +48,8 @@ public slots:
     **/
     void doMorphOper(QString name, int, int);
     void addNoise(QString type, int whiteVal, int blackVal, double mean, double var);
+    void doAdaptiveThreshold(int blockSize, double maxVal,
+                             int methodIdx, int threshTypeIdx, double constant);
     void toColourSpace(int csIdx);
     void doBlur(int idx, int kernelL, int kernelH,double sigmaX, double sigmaY, int medianKernel);
     void doSobelAndLapOper(int,bool,int,int,int,double,int,int);

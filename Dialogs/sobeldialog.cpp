@@ -81,3 +81,8 @@ void SobelDialog::on_SobelScaleSpinBox_valueChanged(int val)
     this->scale = val;
     emit sendSobelVals(currentIdx, applyBlur, kernel, dx, dy, dxWeight, delta, scale);
 }
+
+void SobelDialog::on_pushButton_clicked()
+{
+    this->close();
+}

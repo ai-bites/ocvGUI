@@ -82,10 +82,16 @@
           <item>
            <widget class="QGroupBox" name="groupBox_4">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>300</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="sizeIncrement">
              <size>
@@ -96,13 +102,13 @@
             <property name="title">
              <string>Common Operations</string>
             </property>
-            <widget class="QWidget" name="">
+            <widget class="QWidget" name="layoutWidget">
              <property name="geometry">
               <rect>
                <x>0</x>
                <y>20</y>
-               <width>238</width>
-               <height>43</height>
+               <width>301</width>
+               <height>61</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_4">
@@ -121,9 +127,16 @@
                </widget>
               </item>
               <item row="1" column="0">
-               <widget class="QCheckBox" name="checkBox">
+               <widget class="QCheckBox" name="cascadeCheckBox">
                 <property name="text">
                  <string>Cascade Operations</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QCheckBox" name="checkBox">
+                <property name="text">
+                 <string>Use Default Image</string>
                 </property>
                </widget>
               </item>
@@ -207,8 +220,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>371</width>
-               <height>300</height>
+               <width>381</width>
+               <height>291</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -218,7 +231,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>output image</string>
+              <string>Output Image</string>
              </property>
              <property name="scaledContents">
               <bool>false</bool>
@@ -248,8 +261,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>371</width>
-               <height>300</height>
+               <width>381</width>
+               <height>291</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -259,7 +272,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>input image</string>
+              <string>Input Image</string>
              </property>
              <property name="scaledContents">
               <bool>false</bool>
@@ -400,7 +413,9 @@
     <property name="title">
      <string>Operations</string>
     </property>
+    <addaction name="actionThreshold"/>
     <addaction name="actionAdd_Noise"/>
+    <addaction name="actionLogo"/>
     <addaction name="actionBlur"/>
     <addaction name="actionBrighten"/>
     <addaction name="actionColour_Space"/>
@@ -408,8 +423,6 @@
     <addaction name="action_Filter"/>
     <addaction name="actionHistogram"/>
     <addaction name="actionMorphology"/>
-    <addaction name="actionThreshold"/>
-    <addaction name="actionLogo"/>
    </widget>
    <widget class="QMenu" name="menuEdge">
     <property name="title">
@@ -424,8 +437,8 @@
     <property name="title">
      <string>Extract</string>
     </property>
-    <addaction name="actionEpipolar"/>
     <addaction name="actionContour"/>
+    <addaction name="actionEpipolar"/>
     <addaction name="actionFAST"/>
     <addaction name="actionCorners"/>
     <addaction name="actionMatches"/>
@@ -529,7 +542,7 @@
   </action>
   <action name="actionThreshold">
    <property name="text">
-    <string>Threshold</string>
+    <string>Adaptive Threshold</string>
    </property>
   </action>
   <action name="actionCanny">

@@ -44,6 +44,13 @@ public:
     cv::Mat opImage;
     cv::Mat logo;
 
+    // if we cascade, the output of previous operation
+    // becomes the input for the next operation
+    bool isCascadeEnabled;
+    // dynamically provides image to process based on cascading
+    // or other conditions
+    Mat getImageToProcess();
+
     // for matching, correspondece, fund matrix computation, etc
     cv::Mat firstImg;
     cv::Mat secondImg;
@@ -99,6 +106,9 @@ public:
     std::vector< DMatch > doFlannMatching(Mat descOne, Mat descTwo);
     // Draw contour of connected objects
     void drawContours(int, bool, int methodIdx, bool showRect, bool showCircle);
+    // Does adaptive thresholding on the given image
+    void doAdaptiveThreshold(int blockSize, double maxVal,
+                             int methodIdx, int threshTypeIdx, double constant);
 
 private:
     std::vector<cv::KeyPoint> keypoints;

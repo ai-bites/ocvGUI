@@ -35,6 +35,8 @@ private slots:
 
     void on_SobelScaleSpinBox_valueChanged(int arg1);
 
+    void on_pushButton_clicked();
+
 private:
     Ui::SobelDialog *ui;
     int currentIdx;

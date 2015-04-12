@@ -40,6 +40,7 @@
 #include "Dialogs/contourdialog.h"
 #include "Dialogs/epipolardialog.h"
 #include "Dialogs/logodialog.h"
+#include "Dialogs/adaptivedialog.h"
 
 
 namespace Ui {
@@ -65,6 +66,8 @@ signals:
     void sendCapture();
     void sendMorpOper(QString, int, int);
     void sendAddNoiseParams(QString,int,int,double,double);
+    void sendAdaptiveThreshParams(int blockSize, double maxVal,
+                                  int methodIdx, int threshTypeIdx, double constant);
     void sendColorSpaceParams(int);
     void sendBlur(int idx,int kernelL,
           int kernelH, double sigmaX, double sigmaY,int medianKernel);
@@ -92,6 +95,8 @@ private slots:
     // All handlers for signals emitted from dialog boxes
     void handleMorphSignal(QString choice, int h, int w);
     void handleAddNoise(QString method, int, int, double, double);
+    void handleAdaptiveThreshSignal(int blockSize, double maxVal,
+                                    int methodIdx, int threshTypeIdx, double constant);
     void handleLogoSignal(double, int, int);
     void handleColorDialogSignal(int idx);
     void handleBlurDialogSignal(int idx, int, int, double, double, int);
@@ -151,6 +156,10 @@ private slots:
     void on_logoCheckBox_clicked();
 
     void on_actionLogo_triggered();
+
+    void on_cascadeCheckBox_clicked();
+
+    void on_actionThreshold_triggered();
 
 private:
     Ui::MainWindow *ui;

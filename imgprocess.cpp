@@ -4,29 +4,47 @@ using namespace std;
 
 ImgProcess::ImgProcess()
 {
+    this->isCascadeEnabled = false;
 }
 
 
+Mat ImgProcess::getImageToProcess()
+{
+    Mat toProcess;
+
+    if (this->isCascadeEnabled)
+    {
+        if (this->opImage.data)
+            toProcess = this->opImage.clone();
+        else
+            toProcess = this->grayImage.clone();
+    }
+    else
+        toProcess = this->grayImage.clone();
+    return toProcess;
+}
+
 void ImgProcess::doMorphOper(QString name, int l=5, int b=5)
 {
+
     if (name.toStdString() == "Open")
     {
         //cout << "in do morph open" << "l is: " << l << endl;
         cv::Mat elem(l,b,CV_8U,cv::Scalar(1));
-        cv::morphologyEx(this->grayImage,this->opImage,cv::MORPH_OPEN,elem);
+        cv::morphologyEx(this->getImageToProcess(),this->opImage,cv::MORPH_OPEN,elem);
     }
     else if (name.toStdString() == "Close")
     {
         cv::Mat elem(l,b,CV_8U,cv::Scalar(1));
-        cv::morphologyEx(this->grayImage,this->opImage,cv::MORPH_CLOSE,elem);
+        cv::morphologyEx(this->getImageToProcess(),this->opImage,cv::MORPH_CLOSE,elem);
     }
     else if (name.toStdString() == "Dilate")
     {
-        cv::dilate(this->grayImage,this->opImage,cv::Mat());
+        cv::dilate(this->getImageToProcess(),this->opImage,cv::Mat());
     }
     else if (name.toStdString() == "Erode")
     {
-        cv::erode(this->grayImage,this->opImage,cv::Mat());
+        cv::erode(this->getImageToProcess(),this->opImage,cv::Mat());
     }
     else
     {
@@ -43,23 +61,25 @@ void ImgProcess::addNoise(QString type, int whiteVal, int blackVal, double mean,
     if (type.toStdString() == "Salt and Pepper")
     {
         //cout << "adding snp noise " << endl;
-        Mat snpNoise = Mat::zeros(this->grayImage.rows, this->grayImage.cols,CV_8U);
-        randu(snpNoise,0,255);
+        Mat snpWNoise = Mat::zeros(this->grayImage.rows, this->grayImage.cols,CV_8U);
+        Mat snpBNoise = Mat::zeros(this->grayImage.rows, this->grayImage.cols,CV_8U);
+        randu(snpWNoise,0,255);
+        randu(snpBNoise,0,255);
 
-        Mat black = snpNoise < (255 - whiteVal);
-        Mat white = snpNoise > (255 - blackVal);
+        Mat black = snpBNoise < (255 - whiteVal);
+        Mat white = snpWNoise > (255 - blackVal);
 
-        snpNoise.setTo(0,black);
-        snpNoise.setTo(255,white);
+        snpBNoise.setTo(0,black);
+        snpWNoise.setTo(255,white);
 
-        this->opImage = this->grayImage + snpNoise.clone();
+        this->opImage = this->getImageToProcess() + snpWNoise.clone() + snpBNoise.clone();
     }
     else if (type.toStdString() == "Gaussian")
     {
         Mat gaussImg = Mat::zeros(this->grayImage.rows, this->grayImage.cols,CV_8U);
         randn(gaussImg,mean,var);
         this->opImage = gaussImg.clone();
-        this->opImage = this->grayImage.clone() + gaussImg;
+        this->opImage = this->getImageToProcess().clone() + gaussImg;
     }
     return;
 }
@@ -108,7 +128,7 @@ void ImgProcess::toColourSpace(int idx)
     {
         cvtColor(image, opImage, CV_RGB2HLS);
     }
-    cout << "done with conversion" << endl;
+
 }
 
 
@@ -118,18 +138,47 @@ void ImgProcess::doBlur(int idx, int kernelL, int kernelH,
     // normalized blur
     if (idx == 1)
     {
-        blur(this->grayImage, this->opImage, Size(kernelL,kernelH));
+        blur(getImageToProcess(), this->opImage, Size(kernelL,kernelH));
     }
     // gaussian blur
     if (idx == 2)
     {
-        GaussianBlur(this->grayImage, this->opImage, Size(kernelL, kernelH),sigmaX, sigmaY);
+        GaussianBlur(getImageToProcess(), this->opImage, Size(kernelL, kernelH),sigmaX, sigmaY);
     }
     // median blur
     if (idx == 4)
     {
-        medianBlur(this->grayImage, this->opImage, medianKernel);
+        medianBlur(getImageToProcess(), this->opImage, medianKernel);
     }
+}
+
+
+void ImgProcess::doAdaptiveThreshold(int blockSize, double maxVal,
+                                     int methodIdx, int threshTypeIdx, double constant)
+{
+    cv::Mat temp = getImageToProcess();
+    if (temp.channels() == 3)
+        cvtColor(temp, temp, CV_RGB2GRAY);
+
+    if (methodIdx == 1)
+    {
+        if ( threshTypeIdx == 1)
+            cv::adaptiveThreshold( temp, this->opImage,
+                             255,CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,blockSize, constant );
+        if (threshTypeIdx == 2)
+            cv::adaptiveThreshold( temp, this->opImage,
+                             255,CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY,blockSize, constant );
+    }
+    if (methodIdx == 2)
+    {
+        if (threshTypeIdx == 1)
+            cv::adaptiveThreshold( temp, this->opImage,
+                             255,CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV,blockSize, constant );
+        if (threshTypeIdx == 2)
+            cv::adaptiveThreshold( temp, this->opImage,
+                             255,CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY_INV,blockSize, constant );
+    }
+
 }
 
 void ImgProcess::doSobelAndLapOper(int currentIdx, bool applyBlur,
@@ -140,20 +189,22 @@ void ImgProcess::doSobelAndLapOper(int currentIdx, bool applyBlur,
 
     if (applyBlur == true)
     {
-        GaussianBlur( this->image, temp, Size(3,3), 0, 0, BORDER_DEFAULT);
+        GaussianBlur( getImageToProcess(), temp, Size(3,3), 0, 0, BORDER_DEFAULT);
         if (temp.channels() == 3)
         {
             cvtColor(temp, grayTemp, CV_RGB2GRAY);
         }
+        else
+            grayTemp = temp.clone();
     }
     else
     {
-        if (this->image.channels() == 3)
+        if (getImageToProcess().channels() == 3)
         {
-            cvtColor(this->image, grayTemp, CV_RGB2GRAY);
+            cvtColor(getImageToProcess(), grayTemp, CV_RGB2GRAY);
         }
         else
-            grayTemp = this->grayImage.clone();
+            grayTemp = getImageToProcess().clone();
     }
 
     if (currentIdx == 1) // sobel
@@ -188,6 +239,7 @@ void ImgProcess::doCannyOper(int kernel, int threshold, bool applyBlur, bool isL
     this->opImage = Scalar::all(0);
     // use mask to copy over input to result
     grayTemp.copyTo(this->opImage, mask);
+
 }
 
 

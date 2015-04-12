@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     Dialogs/matchesdialog.cpp \
     Dialogs/contourdialog.cpp \
     Dialogs/epipolardialog.cpp \
-    Dialogs/logodialog.cpp
+    Dialogs/logodialog.cpp \
+    Dialogs/adaptivedialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
@@ -51,7 +52,8 @@ HEADERS  += mainwindow.h \
     Dialogs/contourdialog.h \
     Dialogs/epipolardialog.h \
     robustmatcher.h \
-    Dialogs/logodialog.h
+    Dialogs/logodialog.h \
+    Dialogs/adaptivedialog.h
 
 INCLUDEPATH += /usr/local/include
 
@@ -81,7 +83,8 @@ FORMS    += mainwindow.ui \
     Dialogs/matchesdialog.ui \
     Dialogs/contourdialog.ui \
     Dialogs/epipolardialog.ui \
-    Dialogs/logodialog.ui
+    Dialogs/logodialog.ui \
+    Dialogs/adaptivedialog.ui
 
 RESOURCES += \
     images.qrc

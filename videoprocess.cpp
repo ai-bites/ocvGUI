@@ -52,6 +52,29 @@ void VideoProcess::addNoise(QString type, int whiteVal, int blackVal, double mea
     capture.release();
 }
 
+
+void VideoProcess::doAdaptiveThreshold(int blockSize, double maxVal,
+                                       int methodIdx, int threshTypeIdx, double constant)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        cout << "processing video frames" << endl;
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame;
+        ip->doAdaptiveThreshold(blockSize, maxVal, methodIdx, threshTypeIdx, constant);
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
 void VideoProcess::toColourSpace(int csIdx)
 {
     QImage img;

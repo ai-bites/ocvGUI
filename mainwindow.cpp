@@ -170,6 +170,21 @@ void MainWindow::handleAddNoise(QString method, int white, int black, double mea
 }
 
 
+void MainWindow::handleAdaptiveThreshSignal(int blockSize, double maxVal,
+                                            int methodIdx, int threshTypeIdx, double constant)
+{
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->doAdaptiveThreshold(blockSize, maxVal, methodIdx, threshTypeIdx, constant);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendAdaptiveThreshParams(blockSize, maxVal, methodIdx, threshTypeIdx, constant);
+    }
+}
+
 void MainWindow::handleLogoSignal(double alpha, int height, int width)
 {
     if (isImgLoaded)
@@ -536,6 +551,28 @@ void MainWindow::on_actionAdd_Noise_triggered()
 }
 
 
+void MainWindow::on_actionThreshold_triggered()
+{
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    AdaptiveDialog * ad = new AdaptiveDialog;
+    connect(ad, SIGNAL(sendAdaptiveThreshVals(int,double,int,int,double)),
+            this, SLOT(handleAdaptiveThreshSignal(int,double,int,int,double)));
+
+    if (this->isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit();
+        this->currentThread = t;
+
+        this->connect(this, SIGNAL(sendAdaptiveThreshParams(int,double,int,int,double)),
+                      this->vp, SLOT(doAdaptiveThreshold(int,double,int,int,double)));
+        t->start();
+    }
+
+    ad->show();
+}
+
 void MainWindow::on_actionColour_Space_triggered()
 {
     // check
@@ -824,7 +861,10 @@ void MainWindow::on_action_Save_triggered()
     {
         cout << "nto an image" << endl;
         QMessageBox messageBox;
-        messageBox.critical(0,"Warning","Can save only images !");
+
+        messageBox.critical(
+                    0,"Warning",
+                    "Not Possible! You are either trying to save a livestream or there is no processed image to save!");
         messageBox.setFixedSize(500,200);
         return;
     }
@@ -845,8 +885,20 @@ void MainWindow::on_action_Close_triggered()
 //!
 void MainWindow::on_StartLiveCheckBox_clicked(bool checked)
 {
+    cout << "checked is: " << checked << endl;
     if (checked) // start
     {
+        // we cannot cascade operations for video
+        // so diable it first
+        if (ip->isCascadeEnabled)
+        {
+            ip->isCascadeEnabled = false;
+            ui->cascadeCheckBox->setChecked(false);
+            QMessageBox messageBox;
+            messageBox.information(0,"Message","Disabled cascade operation for video !");
+            messageBox.setFixedSize(500,200);
+        }
+
         cv::VideoCapture capture(0);
         cv::VideoCapture ipCapture(0);
         if (capture.isOpened())
@@ -888,7 +940,9 @@ void MainWindow::on_saveOutput_clicked()
     {
         cout << "not an image" << endl;
         QMessageBox messageBox;
-        messageBox.critical(0,"Warning","Can save only images !");
+        messageBox.critical(
+                    0,"Warning",
+                    "Not Possible! You are either trying to save a livestream or there is no processed image to save!");
         messageBox.setFixedSize(500,200);
         return;
     }
@@ -911,4 +965,20 @@ void MainWindow::on_actionLogo_triggered()
             this, SLOT(handleLogoSignal(double, int, int)));
 
     ld->show();
+}
+
+void MainWindow::on_cascadeCheckBox_clicked()
+{
+    bool isCascade = ui->cascadeCheckBox->isChecked();
+    if (isCascade)
+    {
+        ip->isCascadeEnabled = true;
+        QMessageBox messageBox;
+        messageBox.information(0,"Success","Cascade Enabled Successfully !");
+        messageBox.setFixedSize(500,200);
+    }
+    else
+    {
+        ip->isCascadeEnabled = false;
+    }
 }
