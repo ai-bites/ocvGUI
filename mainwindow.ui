@@ -80,54 +80,54 @@
            <enum>QLayout::SetNoConstraint</enum>
           </property>
           <item>
-           <widget class="QGroupBox" name="groupBox_2">
+           <widget class="QGroupBox" name="groupBox_4">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximumSize">
+            <property name="sizeIncrement">
              <size>
-              <width>150</width>
-              <height>16777215</height>
+              <width>22</width>
+              <height>0</height>
              </size>
             </property>
             <property name="title">
-             <string>Logo</string>
+             <string>Common Operations</string>
             </property>
-            <widget class="QCheckBox" name="checkBox">
+            <widget class="QWidget" name="">
              <property name="geometry">
               <rect>
                <x>0</x>
                <y>20</y>
-               <width>101</width>
-               <height>20</height>
+               <width>238</width>
+               <height>43</height>
               </rect>
              </property>
-             <property name="text">
-              <string>Show Logo</string>
-             </property>
-            </widget>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupBox_4">
-            <property name="title">
-             <string>Live Stream</string>
-            </property>
-            <widget class="QCheckBox" name="StartLiveCheckBox">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>20</y>
-               <width>89</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Start</string>
-             </property>
+             <layout class="QGridLayout" name="gridLayout_4">
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="StartLiveCheckBox">
+                <property name="text">
+                 <string>Start Live Stream</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QCheckBox" name="logoCheckBox">
+                <property name="text">
+                 <string>Add Logo</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QCheckBox" name="checkBox">
+                <property name="text">
+                 <string>Cascade Operations</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </widget>
           </item>
@@ -138,7 +138,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>10</width>
               <height>20</height>
              </size>
             </property>
@@ -400,15 +400,16 @@
     <property name="title">
      <string>Operations</string>
     </property>
-    <addaction name="action_Filter"/>
     <addaction name="actionAdd_Noise"/>
-    <addaction name="actionMorphology"/>
-    <addaction name="actionColour_Space"/>
     <addaction name="actionBlur"/>
-    <addaction name="actionContrast"/>
     <addaction name="actionBrighten"/>
-    <addaction name="actionThreshold"/>
+    <addaction name="actionColour_Space"/>
+    <addaction name="actionContrast"/>
+    <addaction name="action_Filter"/>
     <addaction name="actionHistogram"/>
+    <addaction name="actionMorphology"/>
+    <addaction name="actionThreshold"/>
+    <addaction name="actionLogo"/>
    </widget>
    <widget class="QMenu" name="menuEdge">
     <property name="title">
@@ -416,18 +417,18 @@
     </property>
     <addaction name="actionCanny"/>
     <addaction name="separator"/>
-    <addaction name="actionSobel"/>
     <addaction name="actionHough"/>
+    <addaction name="actionSobel"/>
    </widget>
    <widget class="QMenu" name="menuExtract">
     <property name="title">
      <string>Extract</string>
     </property>
+    <addaction name="actionEpipolar"/>
     <addaction name="actionContour"/>
     <addaction name="actionFAST"/>
     <addaction name="actionCorners"/>
     <addaction name="actionMatches"/>
-    <addaction name="actionEpipolar"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuOperations"/>
@@ -483,7 +484,7 @@
   </action>
   <action name="action_Save">
    <property name="text">
-    <string>&amp;Save Output</string>
+    <string>&amp;Save</string>
    </property>
   </action>
   <action name="action_Close">
@@ -579,6 +580,11 @@
   <action name="actionContour">
    <property name="text">
     <string>Contour</string>
+   </property>
+  </action>
+  <action name="actionLogo">
+   <property name="text">
+    <string>Adjust Logo</string>
    </property>
   </action>
  </widget>

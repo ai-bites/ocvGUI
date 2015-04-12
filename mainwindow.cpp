@@ -120,30 +120,22 @@ void MainWindow::displayImage(Mat inputImg, Mat outputImg, string whichImg)
 
 
 
-/*
+
 void MainWindow::on_logoCheckBox_clicked()
 {
     if (this->isImgLoaded == false) return;
 
     if (ui->logoCheckBox->isChecked() == true)
     {
-        cout << "it is checked" << endl;
-        double alpha = ui->logoSpinBox->value();
-        ip->addLogo(alpha, 10, 10);
+        // ask user to provide the logo
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
+        ip->logo = imread(fileName.toStdString(),CV_RGB2GRAY);
+        // saved it successfully. So show message
+        QMessageBox messageBox;
+        messageBox.information(0, "Success", "Logo added successfully. Adjust Logo to visualise it !");
+        messageBox.setFixedSize(500,200);
     }
-    else
-        cout << "it is unchecked" << endl;
-    displayOp();
 }
-
-void MainWindow::on_logoSpinBox_editingFinished()
-{
-    if (this->isImgLoaded == false) return;
-    cout << "in spinbox edit" << endl;
-    ip->addLogo(ui->logoSpinBox->value(), 10,10);
-    displayOp();
-}
-*/
 
 
 void MainWindow::handleMorphSignal(QString choice, int h, int w)
@@ -174,6 +166,23 @@ void MainWindow::handleAddNoise(QString method, int white, int black, double mea
     if (isVideoLoaded)
     {
         emit sendAddNoiseParams(method, white, black, mean, var);
+    }
+}
+
+
+void MainWindow::handleLogoSignal(double alpha, int height, int width)
+{
+    if (isImgLoaded)
+    {
+        if (!(ip->logo.data))
+        {
+            QMessageBox messageBox;
+            messageBox.warning(0,"Warning","Logo showing not enabled !");
+            messageBox.setFixedSize(500,200);
+            return;
+        }
+        ip->addLogo(alpha, height, width);
+        displayOp();
     }
 }
 
@@ -385,7 +394,7 @@ void MainWindow::handleImageOpen()
         return;
     }
     //TODO: change to right place or make UI for it.
-    ip->logo = imread("/Users/shreya/Desktop/smile.png",CV_RGB2GRAY);
+    //ip->logo = imread("/Users/shreya/Desktop/smile.png",CV_RGB2GRAY);
 
     // colour to grayscale
     cv::cvtColor(ip->image, ip->grayImage, CV_BGR2GRAY);
@@ -895,3 +904,11 @@ void MainWindow::on_closeButton_clicked()
 
 //! End ************************************************!//
 
+void MainWindow::on_actionLogo_triggered()
+{
+    LogoDialog * ld = new LogoDialog(this);
+    connect(ld,  SIGNAL(sendLogoVals(double, int, int)),
+            this, SLOT(handleLogoSignal(double, int, int)));
+
+    ld->show();
+}

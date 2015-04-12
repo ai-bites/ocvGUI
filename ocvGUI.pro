@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     Dialogs/histogramdialog.cpp \
     Dialogs/matchesdialog.cpp \
     Dialogs/contourdialog.cpp \
-    Dialogs/epipolardialog.cpp
+    Dialogs/epipolardialog.cpp \
+    Dialogs/logodialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
@@ -49,7 +50,8 @@ HEADERS  += mainwindow.h \
     Dialogs/matchesdialog.h \
     Dialogs/contourdialog.h \
     Dialogs/epipolardialog.h \
-    robustmatcher.h
+    robustmatcher.h \
+    Dialogs/logodialog.h
 
 INCLUDEPATH += /usr/local/include
 
@@ -78,7 +80,8 @@ FORMS    += mainwindow.ui \
     Dialogs/histogramdialog.ui \
     Dialogs/matchesdialog.ui \
     Dialogs/contourdialog.ui \
-    Dialogs/epipolardialog.ui
+    Dialogs/epipolardialog.ui \
+    Dialogs/logodialog.ui
 
 RESOURCES += \
     images.qrc

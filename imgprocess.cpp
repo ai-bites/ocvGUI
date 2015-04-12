@@ -68,16 +68,17 @@ void ImgProcess::addNoise(QString type, int whiteVal, int blackVal, double mean,
 void ImgProcess::addLogo(float alpha, int h, int l)
 {
     cv::Rect roi = cv::Rect(h,l, logo.cols, logo.rows);
+    // if op image does not exists, create it
     this->opImage = this->grayImage.clone();
+
     cv::Mat imageROI = opImage(roi);
+
     cout << "image roi size: " << imageROI.cols << " " << imageROI.channels() << endl;
     Mat temp;
-    cout << "logo size is: " << logo.cols << logo.channels() << endl;
     cvtColor(logo, temp, CV_RGB2GRAY);
     //cv::addWeighted(imageROI,1.0,logo,0.3,0.,imageROI);
     addWeighted(imageROI,alpha,temp,1-alpha,0.,imageROI);
     logo.copyTo(imageROI,temp);
-    cout << "image roi size: " << imageROI.cols << " " << imageROI.rows << endl;
 }
 
 

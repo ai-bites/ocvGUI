@@ -39,6 +39,7 @@
 #include "Dialogs/matchesdialog.h"
 #include "Dialogs/contourdialog.h"
 #include "Dialogs/epipolardialog.h"
+#include "Dialogs/logodialog.h"
 
 
 namespace Ui {
@@ -91,6 +92,7 @@ private slots:
     // All handlers for signals emitted from dialog boxes
     void handleMorphSignal(QString choice, int h, int w);
     void handleAddNoise(QString method, int, int, double, double);
+    void handleLogoSignal(double, int, int);
     void handleColorDialogSignal(int idx);
     void handleBlurDialogSignal(int idx, int, int, double, double, int);
     void handleSobelDialogSignal(int currentIdx, bool applyBlur,
@@ -146,12 +148,15 @@ private slots:
 
     void on_actionEpipolar_triggered();
 
+    void on_logoCheckBox_clicked();
+
+    void on_actionLogo_triggered();
+
 private:
     Ui::MainWindow *ui;
     void displayOp();
     void refreshIpImg();
     bool isVideoStopped;
-
 
 };
 
