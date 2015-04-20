@@ -16,7 +16,7 @@ public:
     ~CannyDialog();
 
 signals:
-    void sendCannyVals(int, int, bool, bool);
+    void sendCannyVals(int, int, bool, bool, int);
 
 private slots:
     void on_CannyCheckBox_clicked();
@@ -29,9 +29,12 @@ private slots:
 
     void on_CannyLtwoCheckBox_clicked();
 
+    void on_CannyMaxThreshSpinBox_valueChanged(int arg1);
+
 private:
     Ui::CannyDialog *ui;
     int threshold;
+    int maxThresh;
     int kernel;
     bool applyBlur;
     bool isL2Grad;

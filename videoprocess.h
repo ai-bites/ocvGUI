@@ -50,10 +50,12 @@ public slots:
     void addNoise(QString type, int whiteVal, int blackVal, double mean, double var);
     void doAdaptiveThreshold(int blockSize, double maxVal,
                              int methodIdx, int threshTypeIdx, double constant);
+    void addLogo(float alpha, int h, int l);
     void toColourSpace(int csIdx);
     void doBlur(int idx, int kernelL, int kernelH,double sigmaX, double sigmaY, int medianKernel);
+    void doBrightContrast(double alpha, int beta);
     void doSobelAndLapOper(int,bool,int,int,int,double,int,int);
-    void doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad);
+    void doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad, int maxThreshold);
     void doHoughLineTransform(int lineMethodIdx, int lineThreshold,
                               int lineRhoRes, int lineThetaRes, bool lineEdgeDetect);
     void doHoughCircleTransform(double cannyThresh, double detectThresh,

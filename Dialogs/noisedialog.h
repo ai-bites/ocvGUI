@@ -19,6 +19,8 @@ private slots:
 
     void on_noiseAddButton_clicked();
 
+    void on_pushButton_clicked();
+
 private:
     Ui::NoiseDialog *ui;
     QString currentOption;

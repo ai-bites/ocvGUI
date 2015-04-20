@@ -32,7 +32,9 @@ SOURCES += main.cpp\
     Dialogs/contourdialog.cpp \
     Dialogs/epipolardialog.cpp \
     Dialogs/logodialog.cpp \
-    Dialogs/adaptivedialog.cpp
+    Dialogs/adaptivedialog.cpp \
+    Dialogs/calibratedialog.cpp \
+    Dialogs/brightnessdialog.cpp
 
 HEADERS  += mainwindow.h \
     imgprocess.h \
@@ -53,7 +55,9 @@ HEADERS  += mainwindow.h \
     Dialogs/epipolardialog.h \
     robustmatcher.h \
     Dialogs/logodialog.h \
-    Dialogs/adaptivedialog.h
+    Dialogs/adaptivedialog.h \
+    Dialogs/calibratedialog.h \
+    Dialogs/brightnessdialog.h
 
 INCLUDEPATH += /usr/local/include
 
@@ -84,7 +88,9 @@ FORMS    += mainwindow.ui \
     Dialogs/contourdialog.ui \
     Dialogs/epipolardialog.ui \
     Dialogs/logodialog.ui \
-    Dialogs/adaptivedialog.ui
+    Dialogs/adaptivedialog.ui \
+    Dialogs/calibratedialog.ui \
+    Dialogs/brightnessdialog.ui
 
 RESOURCES += \
-    images.qrc
+    ocvImages.qrc

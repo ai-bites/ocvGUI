@@ -19,39 +19,25 @@
      <x>40</x>
      <y>30</y>
      <width>211</width>
-     <height>151</height>
+     <height>158</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="1">
-     <widget class="QSpinBox" name="CannyThreshSpinBox">
-      <property name="minimum">
-       <number>1</number>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_2">
+    <item row="4" column="0">
+     <widget class="QCheckBox" name="CannyCheckBox">
       <property name="text">
-       <string>Kernel</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Threshold</string>
+       <string>Apply Blur</string>
       </property>
      </widget>
     </item>
     <item row="4" column="1">
-     <widget class="QPushButton" name="CannyCancelButton">
+     <widget class="QCheckBox" name="CannyLtwoCheckBox">
       <property name="text">
-       <string>Close</string>
+       <string>L2 Gradient</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
+    <item row="3" column="1">
      <widget class="QSpinBox" name="CannyKernelSpinBox">
       <property name="minimum">
        <number>3</number>
@@ -64,17 +50,45 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="1">
-     <widget class="QCheckBox" name="CannyLtwoCheckBox">
+    <item row="5" column="1">
+     <widget class="QPushButton" name="CannyCancelButton">
       <property name="text">
-       <string>L2 Gradient</string>
+       <string>Close</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Min Threshold</string>
       </property>
      </widget>
     </item>
     <item row="3" column="0">
-     <widget class="QCheckBox" name="CannyCheckBox">
+     <widget class="QLabel" name="label_2">
       <property name="text">
-       <string>Apply Blur</string>
+       <string>Kernel</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QSpinBox" name="CannyThreshSpinBox">
+      <property name="minimum">
+       <number>1</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Max Threshold</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QSpinBox" name="CannyMaxThreshSpinBox">
+      <property name="minimum">
+       <number>1</number>
       </property>
      </widget>
     </item>

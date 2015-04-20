@@ -41,6 +41,8 @@
 #include "Dialogs/epipolardialog.h"
 #include "Dialogs/logodialog.h"
 #include "Dialogs/adaptivedialog.h"
+#include "Dialogs/calibratedialog.h"
+#include "Dialogs/brightnessdialog.h"
 
 
 namespace Ui {
@@ -68,11 +70,13 @@ signals:
     void sendAddNoiseParams(QString,int,int,double,double);
     void sendAdaptiveThreshParams(int blockSize, double maxVal,
                                   int methodIdx, int threshTypeIdx, double constant);
+    void sendAddLogoParams(float alpha, int height, int width);
     void sendColorSpaceParams(int);
     void sendBlur(int idx,int kernelL,
           int kernelH, double sigmaX, double sigmaY,int medianKernel);
+    void sendBrightnessParams(double alpha, int beta);
     void sendSobelParams(int,bool,int,int,int,double,int,int);
-    void sendCannyParams(int,int,bool,bool);
+    void sendCannyParams(int,int,bool,bool, int);
     void sendHoughLinesParams(int lineMethodIdx, int lineThreshold,
                               int lineRhoRes, int lineThetaRes, bool lineEdgeDetect);
     void sendHoughCirclesParams(double, double,int, int, bool);
@@ -97,13 +101,14 @@ private slots:
     void handleAddNoise(QString method, int, int, double, double);
     void handleAdaptiveThreshSignal(int blockSize, double maxVal,
                                     int methodIdx, int threshTypeIdx, double constant);
-    void handleLogoSignal(double, int, int);
+    void handleLogoSignal(float, int, int);
     void handleColorDialogSignal(int idx);
     void handleBlurDialogSignal(int idx, int, int, double, double, int);
+    void handleBrightnessSignal(double alpha, int beta);
     void handleSobelDialogSignal(int currentIdx, bool applyBlur,
                                  int kernel, int dx, int dy, double dxWeight,
                                  int delta,int scale);
-    void handleCannySignal(int kernel, int threshold, bool applyBlur, bool isL2Grad);
+    void handleCannySignal(int kernel, int threshold, bool applyBlur, bool isL2Grad, int maxThreshold);
     void handleHoughLineSignal(int,int,int,int,bool);
     void handleHoughCircleSignal(double, double,int, int, bool);
     void handleHarrisSignal(int blockSize, int aperture, double kValue, int threshold);
@@ -160,6 +165,10 @@ private slots:
     void on_cascadeCheckBox_clicked();
 
     void on_actionThreshold_triggered();
+
+    void on_actionCaliberate_triggered();
+
+    void on_actionBrighten_triggered();
 
 private:
     Ui::MainWindow *ui;

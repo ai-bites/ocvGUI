@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>227</width>
-    <height>212</height>
+    <width>241</width>
+    <height>206</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <rect>
      <x>30</x>
      <y>20</y>
-     <width>171</width>
+     <width>191</width>
      <height>171</height>
     </rect>
    </property>
@@ -28,7 +28,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Alpha</string>
+         <string>Transparance</string>
         </property>
        </widget>
       </item>
@@ -58,7 +58,7 @@
          <number>1</number>
         </property>
         <property name="maximum">
-         <number>200</number>
+         <number>2000</number>
         </property>
         <property name="value">
          <number>10</number>
@@ -75,7 +75,7 @@
       <item row="2" column="1">
        <widget class="QSpinBox" name="logoWidthSpinBox">
         <property name="maximum">
-         <number>200</number>
+         <number>2000</number>
         </property>
         <property name="value">
          <number>10</number>

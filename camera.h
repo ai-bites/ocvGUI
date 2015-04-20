@@ -25,10 +25,11 @@ public:
     void readCalibImages();
     // used to remove any distortion after caliberation
     void removeDistortion(Mat &image);
-
-private:
     // a vector to store all input file names
     vector<string> inputFiles;
+
+private:
+
     // choice for the size of chess board corners
     int boardWidth, boardHeight;
 

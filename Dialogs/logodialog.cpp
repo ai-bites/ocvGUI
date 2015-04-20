@@ -15,7 +15,7 @@ LogoDialog::~LogoDialog()
 
 void LogoDialog::on_logoShowpushButton_clicked()
 {
-    double alpha = ui->alphaDoubleSpinBox->value();
+    float alpha = ui->alphaDoubleSpinBox->value();
     int height = ui->logoHeightSpinBox->value();
     int width = ui->logoWidthSpinBox->value();
 

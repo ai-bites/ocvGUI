@@ -3,9 +3,10 @@
 Camera::Camera()
 {
     boardWidth = 6;
-    boardHeight = 7;
+    boardHeight = 4;
     distCoeffs = cv::Mat::zeros(8, 1, CV_64F);
     cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
+    this->inputFiles.clear();
 }
 
 
@@ -19,8 +20,8 @@ void Camera::calibrate()
 
     Size boardSize(boardWidth, boardHeight);
 
-    // read caliberation images into inputFiles vector
-    readCalibImages();
+    // check if images are available first
+    if (this->inputFiles.size() == 0) return;
 
     // the points on the chessboard
     std::vector<cv::Point2f> imageCorners;
@@ -34,11 +35,16 @@ void Camera::calibrate()
             objectCorners.push_back(cv::Point3f(i, j, 0.0f));
         }
     }
+    cout << "object corners" << objectCorners.size() << endl;
+
+    cout << "input files size: " << inputFiles.size() << endl;
 
     // read every calib image and do caliberation
-    for (int i = 0; i < inputFiles.size(); i++)
+    for (int i = 4; i < inputFiles.size(); i++)
     {
+        cout << "itarating for file " << i << endl;
         tempImage = imread(inputFiles[i],0);
+
         bool found = cv::findChessboardCorners(tempImage, boardSize, imageCorners);
         if (found == false)
         {
@@ -63,11 +69,14 @@ void Camera::calibrate()
     // So now caliberate. The result will be stored in cameraMatrix and distCoeffs
     Size imgSize = tempImage.size();
     double rms = calibrateCamera(objectPoints,imagePoints,
-                                 imgSize, cameraMatrix, distCoeffs, rvecs, tvecs);
+                                 imgSize, this->cameraMatrix, this->distCoeffs, rvecs, tvecs);
 
     cout << "rms is: " << rms << endl;
-
-    this->removeDistortion(tempImage);
+    cout << cameraMatrix << endl;
+    cout << distCoeffs << endl;
+    // test and remove distortion for a test image
+    Mat testImg = imread(inputFiles[10],0);
+    this->removeDistortion(testImg);
 
 }
 
@@ -79,18 +88,20 @@ void Camera::removeDistortion(Mat &image)
     cv::initUndistortRectifyMap(cameraMatrix, distCoeffs,
     cv::Mat(), cv::Mat(), image.size(), CV_32FC1, map1, map2);
     // do actual undistortion and save in undistorted image file
+
     cv::remap(image, undistImg, map1, map2,cv::INTER_LINEAR); // interpolation type
 
-    //cv::namedWindow("result");
-    //cv::imshow("output", undistImg);
+    // display image before and after
+    cv::imshow("input", image);
+    cv::imshow("output", undistImg);
+    waitKey(0);
+    cv::destroyWindow("input");
+    cv::destroyWindow("output");
 
 }
 
 
 void Camera::readCalibImages()
 {
-    inputFiles.push_back("/Users/shreya/Desktop/calib/calib_1.jpg");
-    inputFiles.push_back("/Users/shreya/Desktop/calib/calib_2.jpg");
-    inputFiles.push_back("/Users/shreya/Desktop/calib/calib_3.jpg");
-    inputFiles.push_back("/Users/shreya/Desktop/calib/calib_4.jpg");
+
 }

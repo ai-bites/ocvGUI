@@ -19,7 +19,6 @@
 #include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/stitching/stitcher.hpp>
-//#include <opencv2/stitching/warpers.hpp>
 #include <opencv2/stitching/detail/matchers.hpp>
 #include <opencv2/legacy/legacy.hpp>
 #include <opencv2/opencv.hpp>
@@ -55,60 +54,62 @@ public:
     cv::Mat firstImg;
     cv::Mat secondImg;
     std::vector<cv::KeyPoint> imgOneKeyPts, imgTwoKeyPts;
-    std::vector<cv::Point2f> imgOneKpFlt, imgTwoKpFlt;
+    std::vector<cv::Point2f>  imgOneKpFlt,  imgTwoKpFlt;
     std::vector< DMatch > goodMatches;
 
     // need these when we compute fundamental matrix
     std::vector<cv::KeyPoint> getKeyPoints() {return this->keypoints;}
 
-    /** All functions to enable different actions on images **/
-    // Do morphological operations
+    // All functions to enable different actions on images **/
+    //! Do morphological operations
     void doMorphOper(QString name,int, int);
-    // Add a given type of noise
+    //! Add a given type of noise
     void addNoise(QString type, int whiteVal, int blackVal, double mean, double var);
-    // Add a logo to image
+    //! Add a logo to image
     void addLogo(float alpha,int h, int l);
-    // Convert to a new colourspace
+    //! Convert to a new colourspace
     void toColourSpace(int);
-    // Do blurring of input image
+    //! Do blurring of input image
     void doBlur(int idx, int, int, double, double, int);
-    // Do sobel and laplacian operations
+    //! Do sobel and laplacian operations
     void doSobelAndLapOper(int, bool, int, int, int, double, int, int);
-    // Do canny edge detection
-    void doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad);
-    // Do hough transform for extracting lines
+    //! Do canny edge detection
+    void doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad, int maxThreshold);
+    //! Do hough transform for extracting lines
     void doHoughLineTransform(
             int lineMethodIdx, int lineThreshold,
             int lineRhoRes, int lineThetaRes, bool lineEdgeDetect);
-    // Do hough transform for circles
+    //! Do hough transform for circles
     void doHoughCircleTransform(
             double cannyThresh, double detectThresh, int minRad, int maxRad, bool applyBlur);
-    // Do harris corner extraction
+    //! Do harris corner extraction
     void doHarrisCorner(int blockSize, int aperture,double kValue, int threshold);
-    // Do feature extraction using FAST extractor
+    //! Do feature extraction using FAST extractor
     void doFeatureExtract(int fastThresh, int methodIdx,
                           double surfThresh, double siftThresh, double lineSensThresh);
-    // compute Fundamental matrix given two images
+    //! compute Fundamental matrix given two images
     Mat computeFundMatrix(int methodIdx);
-    // Given an input image and number of bins, compute histogram and display as output
+    //! Given an input image and number of bins, compute histogram and display as output
     void doHistogram(int numBins, bool showHistEqImg);
-    // Finds the match between two given images
+    //! Finds the match between two given images
     void doMatchImages(Mat, Mat, bool);
-    // Stitch images and display the stiched images as one
+    //! Stitch images and display the stiched images as one
     void doStitchImages(Mat firstImg, Mat secondImg, bool isShow);
-    // Draws the epipolar lines for given set of images
+    //! Draws the epipolar lines for given set of images
     void doEpipolarLines(bool isShow, string toDisplay, int fMatMethodIdx,
                          bool showInFirst, bool showInSec, double confLevel,
                          double epiRatio, double minDist, int minHess);
-    // compute homography between two given images
+    //! compute homography between two given images
     void computeHomography();
-    // does Flann matching and returns the matches
+    //! does Flann matching and returns the matches
     std::vector< DMatch > doFlannMatching(Mat descOne, Mat descTwo);
-    // Draw contour of connected objects
+    //! Draw contour of connected objects
     void drawContours(int, bool, int methodIdx, bool showRect, bool showCircle);
-    // Does adaptive thresholding on the given image
+    //! Does adaptive thresholding on the given image
     void doAdaptiveThreshold(int blockSize, double maxVal,
                              int methodIdx, int threshTypeIdx, double constant);
+    //! Adjust brightness and constrast of given image
+    void doBrightContrast(double alpha, int beta);
 
 private:
     std::vector<cv::KeyPoint> keypoints;

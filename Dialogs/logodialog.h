@@ -16,7 +16,7 @@ public:
     ~LogoDialog();
 
 signals:
-    void sendLogoVals(double, int, int);
+    void sendLogoVals(float, int, int);
 
 private slots:
 

@@ -35,11 +35,12 @@ void MainWindow::displayOp()
     cv::Mat temp;
     if (ip->opImage.channels() == 1)
     {
-        cvtColor(ip->opImage,temp, CV_GRAY2RGB);
+        cvtColor(ip->opImage,temp, CV_GRAY2BGR);
     }
     else
     {
-        temp = ip->opImage.clone();
+        //temp = ip->opImage.clone();
+        cvtColor(ip->opImage,temp, CV_RGB2BGR);
     }
 
     QImage img = QImage((const unsigned char*)(temp.data),
@@ -59,7 +60,8 @@ void MainWindow::refreshIpImg()
     }
     else
     {
-        temp = ip->image.clone();
+        //temp = ip->image.clone();
+        cvtColor(ip->image, temp, CV_RGB2BGR);
     }
 
     QImage img = QImage((const unsigned char*)(temp.data),
@@ -71,18 +73,18 @@ void MainWindow::refreshIpImg()
 
 void MainWindow::displayImage(Mat inputImg, Mat outputImg, string whichImg)
 {
-    cout << "in display image, which img is: " << whichImg << endl;
 
     if (whichImg.compare("input") == 0)
     {
         cv::Mat temp;
         if (inputImg.channels() == 1)
         {
-            cvtColor(inputImg,temp, CV_GRAY2RGB);
+            cvtColor(inputImg,temp, CV_GRAY2BGR);
         }
         else
         {
-            temp = inputImg.clone();
+            //temp = inputImg.clone();
+            cvtColor(inputImg,temp, CV_RGB2BGR);
         }
 
         QImage img = QImage((const unsigned char*)(temp.data),
@@ -99,13 +101,12 @@ void MainWindow::displayImage(Mat inputImg, Mat outputImg, string whichImg)
         cv::Mat temp;
         if (outputImg.channels() == 1)
         {
-            cout << "channels are one" << endl;
-            cvtColor(outputImg,temp, CV_GRAY2RGB);
+            cvtColor(outputImg,temp, CV_GRAY2BGR);
         }
         else
         {
-            cout << "setting temp" << endl;
-            temp = outputImg.clone();
+            //temp = outputImg.clone();
+            cvtColor(outputImg,temp, CV_RGB2BGR);
         }
 
         QImage img = QImage((const unsigned char*)(temp.data),
@@ -123,18 +124,21 @@ void MainWindow::displayImage(Mat inputImg, Mat outputImg, string whichImg)
 
 void MainWindow::on_logoCheckBox_clicked()
 {
-    if (this->isImgLoaded == false) return;
 
     if (ui->logoCheckBox->isChecked() == true)
     {
         // ask user to provide the logo
         QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
+        // user clicked cancel without adding a logo
+        if (fileName.toStdString().compare("") == 0) return;
+
         ip->logo = imread(fileName.toStdString(),CV_RGB2GRAY);
         // saved it successfully. So show message
         QMessageBox messageBox;
         messageBox.information(0, "Success", "Logo added successfully. Adjust Logo to visualise it !");
         messageBox.setFixedSize(500,200);
     }
+
 }
 
 
@@ -185,7 +189,7 @@ void MainWindow::handleAdaptiveThreshSignal(int blockSize, double maxVal,
     }
 }
 
-void MainWindow::handleLogoSignal(double alpha, int height, int width)
+void MainWindow::handleLogoSignal(float alpha, int height, int width)
 {
     if (isImgLoaded)
     {
@@ -198,6 +202,10 @@ void MainWindow::handleLogoSignal(double alpha, int height, int width)
         }
         ip->addLogo(alpha, height, width);
         displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendAddLogoParams(alpha, height, width);
     }
 }
 
@@ -234,6 +242,21 @@ void MainWindow::handleBlurDialogSignal(int idx,int kernelL,
 }
 
 
+void MainWindow::handleBrightnessSignal(double alpha, int beta)
+{
+    if (isImgLoaded)
+    {
+        ui->OutputLabel->clear();
+        ip->doBrightContrast(alpha, beta);
+        displayOp();
+    }
+    if (isVideoLoaded)
+    {
+        emit sendBrightnessParams(alpha, beta);
+    }
+}
+
+
 void MainWindow::handleSobelDialogSignal(int currentIdx, bool applyBlur,
                                          int kernel, int dx, int dy, double dxWeight,
                                          int delta,int scale)
@@ -250,17 +273,18 @@ void MainWindow::handleSobelDialogSignal(int currentIdx, bool applyBlur,
     }
 }
 
-void MainWindow::handleCannySignal(int kernel, int threshold, bool applyBlur, bool isL2Grad)
+void MainWindow::handleCannySignal(int kernel, int threshold,
+                                   bool applyBlur, bool isL2Grad, int maxThreshold)
 {
     if (isImgLoaded)
     {
         ui->OutputLabel->clear();
-        ip->doCannyOper(kernel, threshold, applyBlur, isL2Grad);
+        ip->doCannyOper(kernel, threshold, applyBlur, isL2Grad, maxThreshold);
         displayOp();
     }
     if (isVideoLoaded)
     {
-        emit sendCannyParams( kernel, threshold, applyBlur, isL2Grad);
+        emit sendCannyParams( kernel, threshold, applyBlur, isL2Grad, maxThreshold);
     }
 
 }
@@ -399,17 +423,34 @@ void MainWindow::handleContour(int edgeThresh, bool doBlur,
 
 void MainWindow::handleImageOpen()
 {
-    //QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
-    //ip->image = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
-    ip->image = imread("/Users/shreya/Desktop/test_images/marais.jpg");
-
-    if(! ip->image.data)
+    if (ui->useDefaultImgCheckBox->isChecked())
     {
-        cout <<  "Could not open or find the image" << endl;
+        ip->image = imread(":/images/marais.jpg");
+
+        if(! ip->image.data)
+        {
+            QMessageBox messageBox;
+            messageBox.critical(0,"Warning",
+                        "Not able to open the default image. Please try uploading one!");
+            messageBox.setFixedSize(500,200);
+        }
         return;
     }
-    //TODO: change to right place or make UI for it.
-    //ip->logo = imread("/Users/shreya/Desktop/smile.png",CV_RGB2GRAY);
+    else
+    {
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
+        // user cancelled without adding a file
+        if (fileName.toStdString().compare("") == 0) return;
+        ip->image = imread(fileName.toStdString(),CV_LOAD_IMAGE_COLOR);
+    }
+    if(! ip->image.data)
+    {
+        QMessageBox messageBox;
+        messageBox.critical(0,"Warning",
+                    "Not able to open the file. Please try a different file!");
+        messageBox.setFixedSize(500,200);
+        return;
+    }
 
     // colour to grayscale
     cv::cvtColor(ip->image, ip->grayImage, CV_BGR2GRAY);
@@ -453,7 +494,6 @@ void MainWindow::handleVideoOpen(VideoCapture capture)
 
     // Close the video file.
     capture.release();
-    cout << "input: going out of handle" << endl;
 
 }
 
@@ -465,7 +505,6 @@ void MainWindow::startVideoOp()
     this->currentThread = opVideoThread;
     this->vp->capture = this->cap;
     connect(this, SIGNAL(sendCapture()), this->vp, SLOT(displayOpVideo()));
-    cout << "befor emove to thread - start video op" << endl;
     this->vp->moveToThread(opVideoThread);
 
     // op started as new thread, now send input capture
@@ -537,7 +576,6 @@ void MainWindow::on_actionAdd_Noise_triggered()
     // it could be a video operation. So setup threads for it.
     if (this->isVideoLoaded)
     {
-        cout << "in main, it is video loaded. creating thread" << endl;
         QThread * t = new QThread;
         currentThread->exit(0);
         this->currentThread = t;
@@ -548,6 +586,7 @@ void MainWindow::on_actionAdd_Noise_triggered()
     }
 
     nd->show();
+    nd->move(100,0);
 }
 
 
@@ -571,6 +610,27 @@ void MainWindow::on_actionThreshold_triggered()
     }
 
     ad->show();
+}
+
+
+void MainWindow::on_actionLogo_triggered()
+{
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    LogoDialog * ld = new LogoDialog(this);
+    connect(ld,  SIGNAL(sendLogoVals(float, int, int)),
+            this, SLOT(handleLogoSignal(float, int, int)));
+
+    if (this->isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit();
+
+        this->connect(this, SIGNAL(sendAddLogoParams(float,int,int)),
+                      this->vp, SLOT(addLogo(float,int,int)));
+        t->start();
+    }
+    ld->show();
 }
 
 void MainWindow::on_actionColour_Space_triggered()
@@ -621,6 +681,33 @@ void MainWindow::on_actionBlur_triggered()
 }
 
 
+
+void MainWindow::on_actionBrighten_triggered()
+{
+    // check
+    if (this->isImgLoaded == false && this->isVideoLoaded == false) return;
+
+    BrightnessDialog * bd = new BrightnessDialog;
+
+    connect(bd, SIGNAL(sendBrightnessSignal(double,int)),
+            this, SLOT(handleBrightnessSignal(double, int)));
+
+    if (this->isVideoLoaded)
+    {
+        QThread * t = new QThread;
+        currentThread->exit(0);
+        this->currentThread = t;
+
+        this->connect(this,SIGNAL(sendBrightnessParams(double,int)),
+                      this->vp,  SLOT(doBrightContrast(double,int)));
+
+        t->start();
+    }
+
+    bd->show();
+}
+
+
 void MainWindow::on_actionSobel_triggered()
 {
     // check
@@ -654,16 +741,16 @@ void MainWindow::on_actionCanny_triggered()
 
     // create dialog for canny operation params
     CannyDialog * cd = new CannyDialog(this);
-    connect(cd, SIGNAL(sendCannyVals(int,int,bool,bool)),
-            this, SLOT(handleCannySignal(int,int,bool,bool)));
+    connect(cd, SIGNAL(sendCannyVals(int,int,bool,bool,int)),
+            this, SLOT(handleCannySignal(int,int,bool,bool,int)));
     if (isVideoLoaded)
     {
         QThread * t = new QThread;
         currentThread->exit(0);
         this->currentThread = t;
 
-        this->connect(this,SIGNAL(sendCannyParams(int,int,bool,bool)),
-                      this->vp,  SLOT(doCannyOper( int,int,bool,bool)));
+        this->connect(this,SIGNAL(sendCannyParams(int,int,bool,bool,int)),
+                      this->vp,  SLOT(doCannyOper( int,int,bool,bool,int)));
 
         t->start();
     }
@@ -806,6 +893,8 @@ void MainWindow::on_actionEpipolar_triggered()
     connect(ed, SIGNAL(sendEpipolarImages(Mat, Mat,bool,string,int,bool,bool,double,double,double,int)),
             this, SLOT(handleEpipolarImages(Mat, Mat, bool,string,int,bool,bool,double,double,double,int)));
 
+    ui->InputLabel->clear();
+    ui->OutputLabel->clear();
     ed->show();
 }
 
@@ -813,10 +902,13 @@ void MainWindow::on_actionEpipolar_triggered()
 void MainWindow::on_actionMatches_triggered()
 {
     if (this->isVideoLoaded == true) return;
+
     MatchesDialog * md = new MatchesDialog(this);
     connect(md, SIGNAL(sendMatchImages(cv::Mat, cv::Mat, bool, string, bool)),
             this, SLOT(handleMatchImages(cv::Mat, cv::Mat, bool, string, bool)));
 
+    ui->InputLabel->clear();
+    ui->OutputLabel->clear();
     md->show();
 }
 
@@ -837,6 +929,10 @@ void MainWindow::on_action_Open_triggered()
     if (ui->tabWidget->currentIndex() == 1) // video
     {
             QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),"",tr("Files (*.*)"));
+
+            // user cancelled without adding a file
+            if (fileName.toStdString().compare("") == 0) return;
+
             cv::VideoCapture ipCapture(fileName.toStdString());
             this->handleVideoOpen(ipCapture);
     }
@@ -846,20 +942,16 @@ void MainWindow::on_action_Open_triggered()
 
 void MainWindow::on_action_Save_triggered()
 {
-    if (isImgLoaded)
+    if (isImgLoaded && ip->opImage.data)
     {
         QString s = QFileDialog::getSaveFileName(0,"Images (*.png *.xpm *.jpg)",QString(""),
                         QString("Save file dialog"),0);
         if (s.toStdString() == "") return;
 
-        cout << "string is: " << s.toStdString() << endl;
-
        bool res = cv::imwrite(s.toStdString(), ip->opImage);
-       cout << "res is: " << res << endl;
     }
     else
     {
-        cout << "nto an image" << endl;
         QMessageBox messageBox;
 
         messageBox.critical(
@@ -885,7 +977,6 @@ void MainWindow::on_action_Close_triggered()
 //!
 void MainWindow::on_StartLiveCheckBox_clicked(bool checked)
 {
-    cout << "checked is: " << checked << endl;
     if (checked) // start
     {
         // we cannot cascade operations for video
@@ -908,7 +999,14 @@ void MainWindow::on_StartLiveCheckBox_clicked(bool checked)
             vp->isVideoStopped = false;
             this->cap = capture;
             this->startVideoOp();
-            this->handleVideoOpen(ipCapture);
+
+            // now we are not dealing with imges,
+            // so clear and switch to video tab.
+            ui->tabWidget->setCurrentIndex(1);
+            ui->OutputLabel->clear();
+            ui->InputLabel->clear();
+            this->isImgLoaded = false;
+            this->handleVideoOpen(ipCapture);   
         }
     }
     else
@@ -931,14 +1029,10 @@ void MainWindow::on_saveOutput_clicked()
                         QString("Save file dialog"),0);
         if (s.toStdString() == "") return;
 
-        cout << "string is: " << s.toStdString() << endl;
-
        bool res = cv::imwrite(s.toStdString(), ip->opImage);
-       cout << "res is: " << res << endl;
     }
     else
     {
-        cout << "not an image" << endl;
         QMessageBox messageBox;
         messageBox.critical(
                     0,"Warning",
@@ -958,14 +1052,6 @@ void MainWindow::on_closeButton_clicked()
 
 //! End ************************************************!//
 
-void MainWindow::on_actionLogo_triggered()
-{
-    LogoDialog * ld = new LogoDialog(this);
-    connect(ld,  SIGNAL(sendLogoVals(double, int, int)),
-            this, SLOT(handleLogoSignal(double, int, int)));
-
-    ld->show();
-}
 
 void MainWindow::on_cascadeCheckBox_clicked()
 {
@@ -981,4 +1067,10 @@ void MainWindow::on_cascadeCheckBox_clicked()
     {
         ip->isCascadeEnabled = false;
     }
+}
+
+void MainWindow::on_actionCaliberate_triggered()
+{
+    CalibrateDialog * cd = new CalibrateDialog;
+    cd->show();
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>357</width>
+    <width>284</width>
     <height>355</height>
    </rect>
   </property>
@@ -16,7 +16,7 @@
   <widget class="QPushButton" name="FeaturesCloseButton">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>170</x>
      <y>310</y>
      <width>91</width>
      <height>31</height>
@@ -29,9 +29,9 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>50</x>
+     <x>30</x>
      <y>50</y>
-     <width>291</width>
+     <width>231</width>
      <height>251</height>
     </rect>
    </property>
@@ -184,9 +184,9 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>30</x>
      <y>20</y>
-     <width>271</width>
+     <width>231</width>
      <height>26</height>
     </rect>
    </property>

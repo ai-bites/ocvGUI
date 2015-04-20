@@ -134,7 +134,7 @@
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QCheckBox" name="checkBox">
+               <widget class="QCheckBox" name="useDefaultImgCheckBox">
                 <property name="text">
                  <string>Use Default Image</string>
                 </property>
@@ -419,8 +419,6 @@
     <addaction name="actionBlur"/>
     <addaction name="actionBrighten"/>
     <addaction name="actionColour_Space"/>
-    <addaction name="actionContrast"/>
-    <addaction name="action_Filter"/>
     <addaction name="actionHistogram"/>
     <addaction name="actionMorphology"/>
    </widget>
@@ -443,10 +441,17 @@
     <addaction name="actionCorners"/>
     <addaction name="actionMatches"/>
    </widget>
+   <widget class="QMenu" name="menuCamera">
+    <property name="title">
+     <string>Camera</string>
+    </property>
+    <addaction name="actionCaliberate"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuOperations"/>
    <addaction name="menuEdge"/>
    <addaction name="menuExtract"/>
+   <addaction name="menuCamera"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -537,7 +542,7 @@
   </action>
   <action name="actionBrighten">
    <property name="text">
-    <string>Brighten</string>
+    <string>Brightness and Contrast</string>
    </property>
   </action>
   <action name="actionThreshold">
@@ -598,6 +603,11 @@
   <action name="actionLogo">
    <property name="text">
     <string>Adjust Logo</string>
+   </property>
+  </action>
+  <action name="actionCaliberate">
+   <property name="text">
+    <string>Calibrate</string>
    </property>
   </action>
  </widget>

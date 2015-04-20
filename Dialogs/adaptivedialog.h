@@ -28,6 +28,8 @@ private slots:
 
     void on_constantDoubleSpinBox_valueChanged(double arg1);
 
+    void on_closeButton_clicked();
+
 private:
     Ui::AdaptiveDialog *ui;
 };

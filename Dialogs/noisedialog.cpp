@@ -24,7 +24,11 @@ void NoiseDialog::on_noiseAddButton_clicked()
     double m = ui->gaussMeanSpinBox->value();
     double v = ui->gaussVarSpinBox->value();
 
-    cout << "in noise dialog params are: " << currentOption.toStdString() << w << b << m << v << endl;
-
     emit sendAddNoise(currentOption, w, b, m, v);
+}
+
+
+void NoiseDialog::on_pushButton_clicked()
+{
+    this->close();
 }

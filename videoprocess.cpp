@@ -60,11 +60,32 @@ void VideoProcess::doAdaptiveThreshold(int blockSize, double maxVal,
 
     while (isVideoStopped == false) // it is running
     {
-        cout << "processing video frames" << endl;
         capture >> frame;
         cvtColor(frame,destFrame,CV_BGR2GRAY);
         this->ip->grayImage = destFrame;
         ip->doAdaptiveThreshold(blockSize, maxVal, methodIdx, threshTypeIdx, constant);
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
+
+void VideoProcess::addLogo(float alpha, int h, int l)
+{
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame;
+        ip->addLogo(alpha, h, l);
+
         img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
                      ip->opImage.rows,QImage::Format_Indexed8);
 
@@ -120,6 +141,29 @@ void VideoProcess::doBlur(int idx, int kernelL, int kernelH,
 }
 
 
+void VideoProcess::doBrightContrast(double alpha, int beta)
+{
+    cout << "adjusting brightness" << endl;
+    QImage img;
+
+    while (isVideoStopped == false) // it is running
+    {
+        capture >> frame;
+        cvtColor(frame,destFrame,CV_BGR2GRAY);
+        this->ip->grayImage = destFrame;
+        this->ip->image = frame;
+        ip->doBrightContrast(alpha, beta);
+
+        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_Indexed8);
+
+        emit sendVidoeOpImg(img);
+        qApp->processEvents();
+        sleep(0.5);
+    }
+    capture.release();
+}
+
 void VideoProcess::doSobelAndLapOper(int currentIdx, bool applyBlur,
                                      int kernel, int dx, int dy, double dxWeight,
                                      int delta,int scale)
@@ -145,7 +189,8 @@ void VideoProcess::doSobelAndLapOper(int currentIdx, bool applyBlur,
 }
 
 
-void VideoProcess::doCannyOper(int kernel, int threshold, bool applyBlur, bool isL2Grad)
+void VideoProcess::doCannyOper(int kernel, int threshold,
+                               bool applyBlur, bool isL2Grad, int maxThreshold)
 {
     QImage img;
 
@@ -155,7 +200,7 @@ void VideoProcess::doCannyOper(int kernel, int threshold, bool applyBlur, bool i
         cvtColor(frame,destFrame,CV_BGR2GRAY);
         this->ip->grayImage = destFrame;
         this->ip->image = frame;
-        ip->doCannyOper(kernel, threshold, applyBlur, isL2Grad);
+        ip->doCannyOper(kernel, threshold, applyBlur, isL2Grad, maxThreshold);
 
         img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
                      ip->opImage.rows,QImage::Format_Indexed8);
