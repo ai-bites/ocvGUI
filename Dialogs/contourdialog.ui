@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>ContourDialog</class>
  <widget class="QDialog" name="ContourDialog">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
