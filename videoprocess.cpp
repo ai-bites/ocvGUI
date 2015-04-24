@@ -320,8 +320,12 @@ void VideoProcess::doHistogram(int numBins, bool showHistEqImg)
         this->ip->image = frame.clone();
         ip->doHistogram(numBins, showHistEqImg);
 
-        img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+        if (showHistEqImg)
+            img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
                      ip->opImage.rows,QImage::Format_Indexed8);
+        else
+            img = QImage((const unsigned char*)(ip->opImage.data),ip->opImage.cols,
+                     ip->opImage.rows,QImage::Format_RGB888);
 
         emit sendVidoeOpImg(img);
         qApp->processEvents();

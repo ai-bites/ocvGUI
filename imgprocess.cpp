@@ -368,7 +368,7 @@ void ImgProcess::doHistogram(int numBins, bool showHistEqImg)
 {
     if (showHistEqImg)
     {
-        cv::equalizeHist(getImageToProcess(), this->opImage);
+        cv::equalizeHist(this->grayImage, this->opImage);
         return;
     }
 
@@ -384,9 +384,10 @@ void ImgProcess::doHistogram(int numBins, bool showHistEqImg)
     histSize[0] = numBins;
     int channels[] = {0};
 
-    Mat temp = getImageToProcess();
-    if (temp.channels() == 3)
-        cvtColor(temp, temp, CV_RGB2GRAY);
+    Mat temp = this->image;
+
+//    if (temp.channels() == 3)
+//        cvtColor(temp, temp, CV_RGB2GRAY);
 
     cv::calcHist(&temp,
                 1,           // histogram from 1 image only
@@ -397,6 +398,43 @@ void ImgProcess::doHistogram(int numBins, bool showHistEqImg)
                 histSize,  // number of bins
                 ranges     // pixel value range
     );
+
+    /// HACK BEGINS
+    vector<Mat> bgr_planes;
+    split( temp, bgr_planes );
+    float range[] = { 0, 256 } ;
+    const float* histRange = { range };
+    Mat b_hist, g_hist, r_hist;
+    calcHist( &bgr_planes[0], 1, 0, Mat(), b_hist, 1, &numBins, &histRange, true, true );
+    calcHist( &bgr_planes[1], 1, 0, Mat(), g_hist, 1, &numBins, &histRange, true, true );
+    calcHist( &bgr_planes[2], 1, 0, Mat(), r_hist, 1, &numBins, &histRange, true, true );
+
+    // Draw the histograms for B, G and R
+    int hist_w = 512; int hist_h = 400;
+    int bin_w = cvRound( (double) hist_w/numBins );
+
+    Mat hist_Image( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
+
+    /// Normalize the result to [ 0, histImage.rows ]
+    normalize(b_hist, b_hist, 0, hist_Image.rows, NORM_MINMAX, -1, Mat() );
+    normalize(g_hist, g_hist, 0, hist_Image.rows, NORM_MINMAX, -1, Mat() );
+    normalize(r_hist, r_hist, 0, hist_Image.rows, NORM_MINMAX, -1, Mat() );
+
+    /// Draw for each channel
+    for( int i = 1; i < numBins; i++ )
+    {
+      line( hist_Image, Point( bin_w*(i-1), hist_h - cvRound(b_hist.at<float>(i-1)) ) ,
+                       Point( bin_w*(i), hist_h - cvRound(b_hist.at<float>(i)) ),
+                       Scalar( 255, 0, 0), 2, 8, 0  );
+      line( hist_Image, Point( bin_w*(i-1), hist_h - cvRound(g_hist.at<float>(i-1)) ) ,
+                       Point( bin_w*(i), hist_h - cvRound(g_hist.at<float>(i)) ),
+                       Scalar( 0, 255, 0), 2, 8, 0  );
+      line( hist_Image, Point( bin_w*(i-1), hist_h - cvRound(r_hist.at<float>(i-1)) ) ,
+                       Point( bin_w*(i), hist_h - cvRound(r_hist.at<float>(i)) ),
+                       Scalar( 0, 0, 255), 2, 8, 0  );
+    }
+
+    /// HACK ENDS
 
     // now create bar graphs for dispaying histogram data, hist
     double maxVal=0;
@@ -413,7 +451,7 @@ void ImgProcess::doHistogram(int numBins, bool showHistEqImg)
         cv::line(histImg,cv::Point(h,histSize[0]), cv::Point(h, histSize[0]-intensity), cv::Scalar::all(0));
     }
 
-    cv::resize(histImg, this->opImage, this->grayImage.size());
+    cv::resize(hist_Image, this->opImage, this->grayImage.size());
 
 }
 

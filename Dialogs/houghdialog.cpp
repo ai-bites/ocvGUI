@@ -36,28 +36,28 @@ void HoughDialog::on_HoughLineMethodComboBox_currentIndexChanged(int index)
 
 void HoughDialog::on_HoughLineEdgeCheckBox_clicked()
 {
-    if (index == 0) return;
+    if (ui->HoughLineMethodComboBox->currentIndex() == 0) return;
     this->lineEdgeDetect = ui->HoughLineEdgeCheckBox->isChecked();
     emit sendHoughLineVals(lineMethodIdx, lineThreshold, lineRhoRes, lineThetaRes, lineEdgeDetect);
 }
 
 void HoughDialog::on_HoughLineThreshSpinBox_valueChanged(int val)
 {
-    if (index == 0) return;
+    if (ui->HoughLineMethodComboBox->currentIndex() == 0) return;
     this->lineThreshold = val;
     emit sendHoughLineVals(lineMethodIdx, lineThreshold, lineRhoRes, lineThetaRes, lineEdgeDetect);
 }
 
 void HoughDialog::on_HoughLineRhoSpinBox_valueChanged(int val)
 {
-    if (index == 0) return;
+    if (ui->HoughLineMethodComboBox->currentIndex() == 0) return;
     this->lineRhoRes = val;
     emit sendHoughLineVals(lineMethodIdx, lineThreshold, lineRhoRes, lineThetaRes, lineEdgeDetect);
 }
 
 void HoughDialog::on_HoughLineThetSpinBox_valueChanged(int val)
 {
-    if (index == 0) return;
+    if (ui->HoughLineMethodComboBox->currentIndex() == 0) return;
     this->lineThetaRes = val;
     emit sendHoughLineVals(lineMethodIdx, lineThreshold, lineRhoRes, lineThetaRes, lineEdgeDetect);
 }
